@@ -41,9 +41,10 @@ class AnnotationsService extends Service
                 'quote'       => $annotation['quote'],
                 'text'        => $annotation['text'],
                 'tags'        => $annotation['tags'],
-                'contract_id' => (integer) $annotation['contract'],
-                'page_no'     => (integer) $annotation['document_page_no'],
+                'contract_id' => (integer)$annotation['contract'],
+                'page_no'     => (integer)$annotation['document_page_no'],
             ];
+            $contractId                               = $annotation['contract'];
             $document                                 = $this->es->exists($params);
             if ($document) {
                 $params['body']['doc'] = $doc;
@@ -54,7 +55,32 @@ class AnnotationsService extends Service
             }
 
         }
+        $master = $this->insertIntoMaster($contractId, $annotations);
+        return array_merge($response, $master);
+    }
 
-        return $response;
+    /**
+     * Index Master
+     * @param $contractId ,$annotations
+     * @return array
+     */
+
+    private function insertIntoMaster($contractId, $annotations)
+    {
+        $params['index'] = "nrgi";
+        $params['type']  = "master";
+        $params['id']    = $contractId;
+        $document        = $this->es->exists($params);
+        $body            = [
+            "metadata"    => [],
+            "pdf_text"    => [],
+            "annotations" => $annotations
+        ];
+        if ($document) {
+            $params['body']['doc'] = ["annotations" => $annotations];
+            return $this->es->update($params);
+        }
+        $params['body'] = $body;
+        return $this->es->index($params);
     }
 }
