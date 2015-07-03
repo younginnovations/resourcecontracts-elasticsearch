@@ -27,6 +27,7 @@ class PdfTextService extends Service
     {
         $data     = json_decode($textData['pages'], true);
         $metadata = json_decode($textData['metadata'], true);
+        $master   = $this->insertIntoMaster($textData['contract_id'], $data);
         $year     = '';
         if (!empty($metadata['signature_date'])) {
             $year = date('Y', strtotime($metadata['signature_date']));
@@ -38,8 +39,8 @@ class PdfTextService extends Service
             $param['id'] = $text['id'];
             $doc         = [
                 'metadata'    => $metadata,
-                'page_no'     => (integer) $text['page_no'],
-                "contract_id" => (integer) $textData['contract_id'],
+                'page_no'     => (integer)$text['page_no'],
+                "contract_id" => (integer)$textData['contract_id'],
                 "text"        => $text['text']
             ];
             $document    = $this->es->exists($param);
@@ -52,8 +53,32 @@ class PdfTextService extends Service
             }
         }
 
-        return $response;
+        return array_merge($response, $master);
 
+    }
+
+    /**
+     * Create or Update a document
+     * @param $contractId ,$pdftext
+     * @return array
+     */
+    private function insertIntoMaster($contractId, $pdftext)
+    {
+        $params['index'] = "nrgi";
+        $params['type']  = "master";
+        $params['id']    = $contractId;
+        $document        = $this->es->exists($params);
+        $body            = [
+            "metadata"    => [],
+            "pdf_text"    => $pdftext,
+            "annotations" => []
+        ];
+        if ($document) {
+            $params['body']['doc'] = ["pdf_text" => $pdftext,];
+            return $this->es->update($params);
+        }
+        $params['body'] = $body;
+        return $this->es->index($params);
     }
 
 }
