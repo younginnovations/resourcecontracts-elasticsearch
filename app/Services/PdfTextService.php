@@ -41,7 +41,8 @@ class PdfTextService extends Service
                 'metadata'    => $metadata,
                 'page_no'     => (integer)$text['page_no'],
                 "contract_id" => (integer)$textData['contract_id'],
-                "text"        => $text['text']
+                "text"        => $text['text'],
+                "pdf_url"     => $text['pdf_url'],
             ];
             $document    = $this->es->exists($param);
             if ($document) {
