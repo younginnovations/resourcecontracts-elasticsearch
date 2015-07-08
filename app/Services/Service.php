@@ -38,4 +38,24 @@ class Service
             'type'  => $this->type
         ];
     }
+
+    /**
+     * Delete a document by id
+     * @param $param
+     * @return array
+     */
+    public function deleteDocument($param)
+    {
+        return $this->es->delete($param);
+    }
+
+    /**
+     * Delete a document By query
+     * @param $param
+     * @return array
+     */
+    public function deleteDocumentByQuery($param)
+    {
+        return $this->es->deleteByQuery($param);
+    }
 }

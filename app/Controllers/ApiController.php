@@ -1,6 +1,7 @@
 <?php namespace App\Controllers;
 
 use App\Services\AnnotationsService;
+use App\Services\DeleteContractService;
 use App\Services\MetadataService;
 use App\Services\PdfTextService;
 
@@ -69,6 +70,21 @@ class ApiController extends BaseController
         $annotations = new AnnotationsService();
 
         if ($response = $annotations->index($this->request->request->all())) {
+            return $this->json($response);
+        }
+
+        return $this->json(['failed']);
+    }
+
+
+    /**
+     * Delete Contract
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function deleteContract()
+    {
+        $contract = new DeleteContractService();
+        if ($response = $contract->deleteContract($this->request->request->all())) {
             return $this->json($response);
         }
 
