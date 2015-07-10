@@ -79,22 +79,56 @@ class MetadataService extends Service
      */
     public function insertIntoMaster($contracId, $metadata)
     {
+
         $params['index'] = "nrgi";
         $params['type']  = "master";
         $params['id']    = $contracId;
         $document        = $this->es->exists($params);
         $body            = [
-            "metadata"    => $metadata,
-            "pdf_text"    => [],
-            "annotations" => []
+            "metadata"           => $this->filterMetadata($metadata),
+            "metadata_string"    => $this->getMetadataString($metadata),
+            "pdf_text_string"    => [],
+            "annotations_string" => []
         ];
+
         if ($document) {
             $params['body']['doc'] = [
-                "metadata" => $metadata
+                "metadata"        => $this->filterMetadata($metadata),
+                "metadata_string" => $this->getMetadataString($metadata)
             ];
             return $this->es->update($params);
         }
         $params['body'] = $body;
         return $this->es->index($params);
+    }
+
+    public function filterMetadata($metadata)
+    {
+
+        $data                   = [];
+        $data['contract_name']  = $metadata->contract_name;
+        $data['country_name']   = $metadata->country->name;
+        $data['country_code']   = $metadata->country->code;
+        $data['signature_year'] = $metadata->signature_year;
+        $data['signature_date'] = $metadata->signature_date;
+        $data['file_size']      = $metadata->file_size;
+        $data['language']       = $metadata->language;
+
+        return $data;
+    }
+
+    private function getMetadataString($metadata, $data = '')
+    {
+        foreach ($metadata as $value) {
+            if (is_array($value) || is_object($value)) {
+                $data = $this->getMetadataString($value, $data);
+            } else {
+                if ($value != '') {
+                    $data .= ' ' . $value;
+                }
+            }
+        }
+
+        return $data;
     }
 }

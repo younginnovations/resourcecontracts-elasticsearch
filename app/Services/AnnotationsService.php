@@ -72,15 +72,26 @@ class AnnotationsService extends Service
         $params['id']    = $contractId;
         $document        = $this->es->exists($params);
         $body            = [
-            "metadata"    => [],
-            "pdf_text"    => [],
-            "annotations" => $annotations
+            "metadata"           => [],
+            "metadata_string"    => [],
+            "pdf_text_string"    => [],
+            "annotations_string" => $this->getAnnotationsString($annotations)
         ];
         if ($document) {
-            $params['body']['doc'] = ["annotations" => $annotations];
+            $params['body']['doc'] = ["annotations_string" => $this->getAnnotationsString($annotations)];
             return $this->es->update($params);
         }
         $params['body'] = $body;
         return $this->es->index($params);
+    }
+
+    private function getAnnotationsString($annotations)
+    {
+        $data = '';
+        foreach ($annotations as $annotation) {
+            $data .= ' ' . $annotation['quote']. ' ' . $annotation['tags'];
+        }
+
+        return $data;
     }
 }

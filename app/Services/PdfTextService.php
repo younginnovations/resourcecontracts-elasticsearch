@@ -70,16 +70,30 @@ class PdfTextService extends Service
         $params['id']    = $contractId;
         $document        = $this->es->exists($params);
         $body            = [
-            "metadata"    => [],
-            "pdf_text"    => $pdftext,
-            "annotations" => []
+            "metadata"           => [],
+            "metadata_string"    => [],
+            "pdf_text_string"    => $this->getPdfTextString($pdftext),
+            "annotations_string" => []
         ];
         if ($document) {
-            $params['body']['doc'] = ["pdf_text" => $pdftext,];
+            $params['body']['doc'] = ["pdf_text_string" => $this->getPdfTextString($pdftext),];
             return $this->es->update($params);
         }
         $params['body'] = $body;
+
         return $this->es->index($params);
     }
+
+    private function getPdfTextString($pdftext)
+    {
+
+        $data = '';
+        foreach ($pdftext as $text) {
+            $data .= strip_tags($text['text']) . ' ';
+        }
+
+        return $data;
+    }
+
 
 }
