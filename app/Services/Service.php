@@ -58,4 +58,5 @@ class Service
     {
         return $this->es->deleteByQuery($param);
     }
+
 }
