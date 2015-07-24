@@ -41,6 +41,7 @@ class AnnotationsService extends Service
                 'quote'       => $annotation['quote'],
                 'text'        => $annotation['text'],
                 'tags'        => $annotation['tags'],
+                'category'    => $annotation['category'] ,
                 'contract_id' => (integer)$annotation['contract'],
                 'page_no'     => (integer)$annotation['document_page_no'],
             ];
