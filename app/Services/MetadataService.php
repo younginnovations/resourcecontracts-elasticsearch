@@ -111,6 +111,7 @@ class MetadataService extends Service
         $data['country_code']   = $metadata->country->code;
         $data['signature_year'] = $metadata->signature_year;
         $data['signature_date'] = $metadata->signature_date;
+        $data['resource']       = $metadata->resource;
         $data['file_size']      = $metadata->file_size;
         $data['language']       = $metadata->language;
 
