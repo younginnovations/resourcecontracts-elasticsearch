@@ -32,4 +32,3 @@ This application uses following packages:
 * [League Route](http://route.thephpleague.com/) - for Routing 
 * [PHP dotenv] (https://github.com/vlucas/phpdotenv) - for loading environment variables
 
-
