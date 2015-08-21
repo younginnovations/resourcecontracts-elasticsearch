@@ -33,18 +33,19 @@ class MetadataService extends Service
         $createdBy    = json_decode($metaData['created_by']);
         $updatedBy    = json_decode($metaData['updated_by']);
         $data         = [
-            'contract_id'        => $metaData['id'],
-            'metadata'           => $metadata,
-            'updated_user_name'  => $updatedBy->name,
-            'total_pages'        => $metaData['total_pages'],
-            'updated_user_email' => $updatedBy->email,
-            'created_user_name'  => $createdBy->name,
-            'created_user_email' => $createdBy->email,
-            'created_at'         => date('Y-m-d', strtotime($metaData['created_at'])) . 'T' . date(
+            'contract_id'          => $metaData['id'],
+            'metadata'             => $metadata,
+            'updated_user_name'    => $updatedBy->name,
+            'total_pages'          => $metaData['total_pages'],
+            'updated_user_email'   => $updatedBy->email,
+            'created_user_name'    => $createdBy->name,
+            'created_user_email'   => $createdBy->email,
+            'supporting_contracts' => $metaData['supporting_contracts'],
+            'created_at'           => date('Y-m-d', strtotime($metaData['created_at'])) . 'T' . date(
                     'H:i:s',
                     strtotime($metaData['created_at'])
                 ),
-            'updated_at'         => date('Y-m-d', strtotime($metaData['updated_at'])) . 'T' . date(
+            'updated_at'           => date('Y-m-d', strtotime($metaData['updated_at'])) . 'T' . date(
                     'H:i:s',
                     strtotime($metaData['updated_at'])
                 ),
@@ -56,6 +57,7 @@ class MetadataService extends Service
         }
         $params['body'] = $data;
         $response       = $this->es->index($params);
+
         return array_merge($response, $master);
     }
 
@@ -96,9 +98,11 @@ class MetadataService extends Service
                 "metadata"        => $this->filterMetadata($metadata),
                 "metadata_string" => $this->getMetadataString($metadata)
             ];
+
             return $this->es->update($params);
         }
         $params['body'] = $body;
+
         return $this->es->index($params);
     }
 
@@ -114,6 +118,7 @@ class MetadataService extends Service
         $data['resource']       = $metadata->resource;
         $data['file_size']      = $metadata->file_size;
         $data['language']       = $metadata->language;
+        $data['category']       = $metadata->category;
 
         return $data;
     }
