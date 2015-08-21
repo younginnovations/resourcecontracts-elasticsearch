@@ -26,23 +26,30 @@ class ApiController extends BaseController
      */
     public function metadata()
     {
-        $metadata = new MetadataService();
+        try {
+            $metadata = new MetadataService();
 
-        $data = [
-            'id'          => $this->request->request->get('id'),
-            'metadata'    => $this->request->request->get('metadata'),
-            'created_by'  => $this->request->request->get('created_by'),
-            'updated_by'  => $this->request->request->get('updated_by'),
-            'created_at'  => $this->request->request->get('created_at'),
-            'updated_at'  => $this->request->request->get('updated_at'),
-            'total_pages' => $this->request->request->get('total_pages'),
-        ];
+            $data = [
+                'id'                   => $this->request->request->get('id'),
+                'metadata'             => $this->request->request->get('metadata'),
+                'created_by'           => $this->request->request->get('created_by'),
+                'updated_by'           => $this->request->request->get('updated_by'),
+                'created_at'           => $this->request->request->get('created_at'),
+                'updated_at'           => $this->request->request->get('updated_at'),
+                'total_pages'          => $this->request->request->get('total_pages'),
+                'supporting_contracts' => $this->request->request->get('supporting_contracts'),
+            ];
 
-        if ($response = $metadata->index($data)) {
-            return $this->json($response);
+            if ($response = $metadata->index($data)) {
+                return $this->json($response);
+            }
+
+            return $this->json(['result' => 'failed']);
+
+        } catch (\Exception $e) {
+            return $this->json(['result' => $e->getMessage()]);
         }
 
-        return $this->json(['result' => 'fail']);
     }
 
     /**
