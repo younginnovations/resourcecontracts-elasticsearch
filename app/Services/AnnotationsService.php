@@ -81,6 +81,7 @@ class AnnotationsService extends Service
         if ($document) {
             $params['body']['doc'] = ["annotations_string" => $this->getAnnotationsString($annotations)];
             return $this->es->update($params);
+
         }
         $params['body'] = $body;
         return $this->es->index($params);
