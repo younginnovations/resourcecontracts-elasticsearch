@@ -10,7 +10,7 @@ class MetadataService extends Service
      * ES Index Name
      * @var string
      */
-    protected $index = 'nrgi';
+    protected $index = 'nrgi1';
 
     /**
      *  ES Type
@@ -21,7 +21,7 @@ class MetadataService extends Service
     public function __construct()
     {
         parent::__construct();
-        // $this->checkIndex();
+        $this->checkIndex();
     }
 
     /**
@@ -46,6 +46,7 @@ class MetadataService extends Service
             'updated_user_email'   => $updatedBy->email,
             'created_user_name'    => $createdBy->name,
             'created_user_email'   => $createdBy->email,
+            'resource_raw'         => $metadata->resource,
             'supporting_contracts' => $metaData['supporting_contracts'],
             'created_at'           => date('Y-m-d', strtotime($metaData['created_at'])) . 'T' . date(
                     'H:i:s',
@@ -324,7 +325,22 @@ class MetadataService extends Service
                                         [
                                             'type' => 'string',
                                         ],
+                                    'translated_from'       =>
+                                        [
+                                            'properties' =>
+                                                [
+                                                    'id'            =>
+                                                        [
+                                                            'type' => 'integer',
+                                                        ],
+                                                    'contract_name' =>
+                                                        [
+                                                            'type' => 'string',
+                                                        ],
+                                                ],
+                                        ],
                                 ],
+
                         ],
                     'signature_year'       =>
                         [
@@ -367,20 +383,6 @@ class MetadataService extends Service
                             'type' => 'string',
                         ],
                     'supporting_contracts' =>
-                        [
-                            'properties' =>
-                                [
-                                    'id'            =>
-                                        [
-                                            'type' => 'integer',
-                                        ],
-                                    'contract_name' =>
-                                        [
-                                            'type' => 'string',
-                                        ],
-                                ],
-                        ],
-                    'translated_from'      =>
                         [
                             'properties' =>
                                 [
