@@ -10,7 +10,7 @@ class PdfTextService extends Service
      * ES Index Name
      * @var string
      */
-    protected $index = 'nrgi';
+    protected $index = 'nrgi1';
 
     /**
      *  ES Type
