@@ -93,7 +93,7 @@ class MetadataService extends Service
     public function insertIntoMaster($contracId, $metadata)
     {
 
-        $params['index'] = "nrgi";
+        $params['index'] = $this->index;
         $params['type']  = "master";
         $params['id']    = $contracId;
         $document        = $this->es->exists($params);
@@ -120,16 +120,30 @@ class MetadataService extends Service
     public function filterMetadata($metadata)
     {
 
-        $data                   = [];
-        $data['contract_name']  = $metadata->contract_name;
-        $data['country_name']   = $metadata->country->name;
-        $data['country_code']   = $metadata->country->code;
-        $data['signature_year'] = $metadata->signature_year;
-        $data['signature_date'] = $metadata->signature_date;
-        $data['resource']       = $metadata->resource;
-        $data['file_size']      = $metadata->file_size;
-        $data['language']       = $metadata->language;
-        $data['category']       = $metadata->category;
+        $data                       = [];
+        $data['contract_name']      = $metadata->contract_name;
+        $data['country_name']       = $metadata->country->name;
+        $data['country_code']       = $metadata->country->code;
+        $data['signature_year']     = $metadata->signature_year;
+        $data['signature_date']     = $metadata->signature_date;
+        $data['resource']           = $metadata->resource;
+        $data['file_size']          = $metadata->file_size;
+        $data['language']           = $metadata->language;
+        $data['category']           = $metadata->category;
+        $data['contract_type']      = $metadata->type_of_contract;
+        $data['resource_raw']       = $data['resource'];
+        $data['company_name']       = [];
+        $data['corporate_grouping'] = [];
+
+        foreach ($metadata->company as $company) {
+            if ($company->name != "") {
+                array_push($data['company_name'], $company->name);
+            }
+            if ($company->parent_company != "") {
+                array_push($data['corporate_grouping'], $company->parent_company);
+            }
+
+        }
 
         return $data;
     }
@@ -158,7 +172,7 @@ class MetadataService extends Service
         if (!$condition) {
             $this->es->indices()->create(['index' => $this->index]);
             $this->createMetadataMapping();
-
+            $this->createMasterMapping();
         }
 
         return true;
@@ -415,6 +429,81 @@ class MetadataService extends Service
         ];
 
         $params['body'][$this->type] = $mapping;
+        $this->es->indices()->putMapping($params);
+
+        return true;
+    }
+
+    /**
+     * Create Master Mapping
+     */
+    private function createMasterMapping()
+    {
+        $params['index'] = $this->index;
+        $this->es->indices()->refresh($params);
+        $params['type'] = "master";
+        $mapping        = [
+            "properties" => [
+                "metadata"           => [
+                    "properties" => [
+                        "contract_name"      => [
+                            "type" => "string"
+                        ],
+                        "country_name"       => [
+                            "type" => "string"
+                        ],
+                        "country_code"       => [
+                            "type" => "string"
+                        ],
+                        "signature_year"     => [
+                            "type" => "string"
+                        ],
+                        "signature_date"     => [
+                            'type'   => 'date',
+                            'format' => 'dateOptionalTime',
+                        ],
+                        "resource"           => [
+                            "type" => "string"
+                        ],
+                        "resource_raw"       => [
+                            "type"  => "string",
+                            'index' => 'not_analyzed'
+                        ],
+                        "file_size"          => [
+                            "type" => "integer",
+                        ],
+                        "language"           => [
+                            "type" => "string"
+                        ],
+                        "category"           => [
+                            "type" => "string"
+                        ],
+                        "contract_type"      => [
+                            "type" => "string"
+                        ],
+                        "company_name"       => [
+                            "type"  => "string",
+                            'index' => 'not_analyzed'
+                        ],
+                        "corporate_grouping" => [
+                            "type"  => "string",
+                            'index' => 'not_analyzed'
+                        ]
+                    ]
+                ],
+                "metadata-string"    => [
+                    "type" => "string"
+                ],
+                "pdf_text_string"    => [
+                    "type" => "string"
+                ],
+                "annotations_string" => [
+                    "type" => "string"
+                ]
+            ]
+        ];
+
+        $params['body']["master"] = $mapping;
         $this->es->indices()->putMapping($params);
 
         return true;
