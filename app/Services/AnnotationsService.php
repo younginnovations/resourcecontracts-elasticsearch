@@ -68,7 +68,7 @@ class AnnotationsService extends Service
 
     private function insertIntoMaster($contractId, $annotations)
     {
-        $params['index'] = "nrgi";
+        $params['index'] = $this->index;
         $params['type']  = "master";
         $params['id']    = $contractId;
         $document        = $this->es->exists($params);

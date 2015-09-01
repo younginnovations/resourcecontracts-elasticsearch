@@ -65,7 +65,7 @@ class PdfTextService extends Service
      */
     private function insertIntoMaster($contractId, $pdftext)
     {
-        $params['index'] = "nrgi";
+        $params['index'] = $this->index;
         $params['type']  = "master";
         $params['id']    = $contractId;
         $document        = $this->es->exists($params);
