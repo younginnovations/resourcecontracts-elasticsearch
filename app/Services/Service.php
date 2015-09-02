@@ -8,7 +8,7 @@ class Service
      * ES Index Name
      * @var string
      */
-    protected $index = '';
+    protected $index;
 
     /**
      *  ES Type
@@ -23,6 +23,7 @@ class Service
 
     function __construct()
     {
+        $this->index = env('INDEX');
         $client   = new ClientBuilder();
         $this->es = $client->create()->build();
     }
