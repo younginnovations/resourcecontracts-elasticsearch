@@ -35,9 +35,10 @@ class DeleteContractService extends Service
     private function deleteMetadata($id)
     {
         try {
-            $params['index'] = "nrgi1";
+            $params['index'] = $this->index;
             $params['type']  = "metadata";
             $params['id']    = $id;
+
             return $this->deleteDocument($params);
         } catch (Missing404Exception $e) {
             return "Metadata not found";
@@ -53,9 +54,10 @@ class DeleteContractService extends Service
     private function deletePdfText($id)
     {
         try {
-            $params['index']                                 = "nrgi1";
-            $params['type']                                  = "pdf_text";
+            $params['index']                                = $this->index;
+            $params['type']                                 = "pdf_text";
             $params['body']['query']['term']['contract_id'] = $id;
+
             return $this->deleteDocumentByQuery($params);
         } catch (Missing404Exception $e) {
             return "Text not found";
@@ -71,8 +73,8 @@ class DeleteContractService extends Service
     private function deleteAnnotations($id)
     {
         try {
-            $params['index']                                 = "nrgi1";
-            $params['type']                                  = "annotations";
+            $params['index']                                = $this->index;
+            $params['type']                                 = "annotations";
             $params['body']['query']['term']['contract_id'] = $id;
 
             return $this->deleteDocumentByQuery($params);
@@ -90,7 +92,7 @@ class DeleteContractService extends Service
     private function deleteMaster($id)
     {
         try {
-            $params['index'] = "nrgi1";
+            $params['index'] = $this->index;
             $params['type']  = "master";
             $params['id']    = $id;
 
