@@ -239,6 +239,10 @@ class MetadataService extends Service
                                             'type'   => 'date',
                                             'format' => 'dateOptionalTime',
                                         ],
+                                    'signature_year'        =>
+                                        [
+                                            'type' => 'string',
+                                        ],
                                     'document_type'         =>
                                         [
                                             'type' => 'string',
@@ -257,7 +261,7 @@ class MetadataService extends Service
                                                         ],
                                                     'participation_share'           =>
                                                         [
-                                                            'type' => 'integer',
+                                                            'type' => 'double',
                                                         ],
                                                     'jurisdiction_of_incorporation' =>
                                                         [
@@ -349,10 +353,6 @@ class MetadataService extends Service
                                         ],
                                 ],
 
-                        ],
-                    'signature_year'       =>
-                        [
-                            'type' => 'string',
                         ],
                     'file_size'            =>
                         [

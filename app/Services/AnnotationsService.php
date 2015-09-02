@@ -30,14 +30,13 @@ class AnnotationsService extends Service
             $params                                   = $this->getIndexType();
             $params['id']                             = $annotation['id'];
             $doc                                      = [
-                'metadata'    => $annotation['metadata'],
                 'ranges'      => $annotation['ranges'],
                 'quote'       => $annotation['quote'],
                 'text'        => $annotation['text'],
                 'tags'        => $annotation['tags'],
-                'category'    => $annotation['category'] ,
-                'contract_id' => (integer)$annotation['contract'],
-                'page_no'     => (integer)$annotation['document_page_no'],
+                'category'    => $annotation['category'],
+                'contract_id' => (integer) $annotation['contract'],
+                'page_no'     => (integer) $annotation['document_page_no'],
             ];
             $contractId                               = $annotation['contract'];
             $document                                 = $this->es->exists($params);
@@ -51,6 +50,7 @@ class AnnotationsService extends Service
 
         }
         $master = $this->insertIntoMaster($contractId, $annotations);
+
         return array_merge($response, $master);
     }
 
@@ -74,10 +74,12 @@ class AnnotationsService extends Service
         ];
         if ($document) {
             $params['body']['doc'] = ["annotations_string" => $this->getAnnotationsString($annotations)];
+
             return $this->es->update($params);
 
         }
         $params['body'] = $body;
+
         return $this->es->index($params);
     }
 
@@ -85,7 +87,7 @@ class AnnotationsService extends Service
     {
         $data = '';
         foreach ($annotations as $annotation) {
-            $data .= ' ' . $annotation['quote']. ' ' . $annotation['tags'];
+            $data .= ' ' . $annotation['quote'] . ' ' . $annotation['tags'];
         }
 
         return $data;
