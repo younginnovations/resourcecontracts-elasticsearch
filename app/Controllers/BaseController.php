@@ -24,12 +24,14 @@ class BaseController
     /**
      * display content
      *
-     * @param $page
+     * @param       $page
+     * @param array $data
      * @return Response
+     * @throws \Exception
      */
-    protected function view($page)
+    protected function view($page, $data = [])
     {
-        $content = view($page);
+        $content = view($page, $data);
 
         return $this->response->create($content);
     }

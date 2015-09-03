@@ -4,7 +4,8 @@
   "require": {
     "elasticsearch/elasticsearch": "~2.0@beta",
     "league/route": "^1.1",
-    "vlucas/phpdotenv": "^2.0"
+    "vlucas/phpdotenv": "^2.0",
+    "monolog/monolog": "^1.17"
   },
   "autoload": {
     "psr-4": {
