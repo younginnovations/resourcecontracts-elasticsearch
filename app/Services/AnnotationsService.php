@@ -48,8 +48,6 @@ class AnnotationsService extends Service
 
             return array_merge($response, $master);
 
-            return $response;
-
 
         } catch (\Exception $e) {
             return $e->getMessage();
@@ -89,7 +87,7 @@ class AnnotationsService extends Service
     {
         $data = '';
         foreach ($annotations as $annotation) {
-            $data .= ' ' . isset($annotation['text']) ? $annotation['text'] : "" . " " . isset($annotation['quote']) ? $annotation['quote'] : "" . ' ' . $annotation['tags'];
+            $data .= ' ' . isset($annotation['text']) ? $annotation['text'] : "" . " " . isset($annotation['quote']) ? $annotation['quote'] : "" . ' ' . isset($annotation['category'])?$annotation['category']:"";
         }
 
         return $data;
