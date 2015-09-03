@@ -1,4 +1,5 @@
 <?php
+define('APP_PATH', dirname(__FILE__));
 /*
  * Composer Autoload
  */
