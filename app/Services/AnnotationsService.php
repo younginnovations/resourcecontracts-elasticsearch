@@ -85,9 +85,14 @@ class AnnotationsService extends Service
 
     private function getAnnotationsString($annotations)
     {
+
         $data = '';
         foreach ($annotations as $annotation) {
-            $data .= ' ' . isset($annotation['text']) ? $annotation['text'] : "" . " " . isset($annotation['quote']) ? $annotation['quote'] : "" . ' ' . isset($annotation['category'])?$annotation['category']:"";
+            $quote = isset($annotation['quote'])?$annotation['quote']:"";
+            $text = isset($annotation['text'])?$annotation['text']:"";
+            $category = isset($annotation['category'])?$annotation['category']:"";
+            $data .= ' '.$quote.' '.$text.' '.$category;
+
         }
 
         return $data;
