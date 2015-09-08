@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "elasticsearch/elasticsearch",
-            "version": "v2.0.0-beta4",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/elastic/elasticsearch-php.git",
-                "reference": "8387e53c4fcd615b2b57de4d6b7a07e17ffb5385"
+                "reference": "e9b6963dbb2864d33bf3c76df022a077c2cbda82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/8387e53c4fcd615b2b57de4d6b7a07e17ffb5385",
-                "reference": "8387e53c4fcd615b2b57de4d6b7a07e17ffb5385",
+                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/e9b6963dbb2864d33bf3c76df022a077c2cbda82",
+                "reference": "e9b6963dbb2864d33bf3c76df022a077c2cbda82",
                 "shasum": ""
             },
             "require": {
@@ -58,7 +58,7 @@
                 "elasticsearch",
                 "search"
             ],
-            "time": "2015-05-22 15:38:37"
+            "time": "2015-08-28 19:01:19"
         },
         {
             "name": "guzzlehttp/ringphp",
@@ -221,16 +221,16 @@
         },
         {
             "name": "league/route",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/route.git",
-                "reference": "06b0b3cb203f329875ad534d0f8a049d23767005"
+                "reference": "d740c9d5606daad8ec37309974807541a1c98a61"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/route/zipball/06b0b3cb203f329875ad534d0f8a049d23767005",
-                "reference": "06b0b3cb203f329875ad534d0f8a049d23767005",
+                "url": "https://api.github.com/repos/thephpleague/route/zipball/d740c9d5606daad8ec37309974807541a1c98a61",
+                "reference": "d740c9d5606daad8ec37309974807541a1c98a61",
                 "shasum": ""
             },
             "require": {
@@ -275,7 +275,7 @@
                 "league",
                 "route"
             ],
-            "time": "2015-02-24 18:34:01"
+            "time": "2015-08-24 12:47:30"
         },
         {
             "name": "monolog/monolog",
@@ -436,16 +436,16 @@
         },
         {
             "name": "react/promise",
-            "version": "v2.2.0",
+            "version": "v2.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "365fcee430dfa4ace1fbc75737ca60ceea7eeeef"
+                "reference": "3b6fca09c7d56321057fa8867c8dbe1abf648627"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/365fcee430dfa4ace1fbc75737ca60ceea7eeeef",
-                "reference": "365fcee430dfa4ace1fbc75737ca60ceea7eeeef",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/3b6fca09c7d56321057fa8867c8dbe1abf648627",
+                "reference": "3b6fca09c7d56321057fa8867c8dbe1abf648627",
                 "shasum": ""
             },
             "require": {
@@ -472,24 +472,24 @@
             "authors": [
                 {
                     "name": "Jan Sorgalla",
-                    "email": "jsorgalla@googlemail.com"
+                    "email": "jsorgalla@gmail.com"
                 }
             ],
             "description": "A lightweight implementation of CommonJS Promises/A for PHP",
-            "time": "2014-12-30 13:32:42"
+            "time": "2015-07-03 13:48:55"
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v2.7.1",
+            "version": "v2.7.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/HttpFoundation.git",
-                "reference": "4f363c426b0ced57e3d14460022feb63937980ff"
+                "reference": "863af6898081b34c65d42100c370b9f3c51b70ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/HttpFoundation/zipball/4f363c426b0ced57e3d14460022feb63937980ff",
-                "reference": "4f363c426b0ced57e3d14460022feb63937980ff",
+                "url": "https://api.github.com/repos/symfony/HttpFoundation/zipball/863af6898081b34c65d42100c370b9f3c51b70ca",
+                "reference": "863af6898081b34c65d42100c370b9f3c51b70ca",
                 "shasum": ""
             },
             "require": {
@@ -529,7 +529,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2015-06-10 15:30:22"
+            "time": "2015-07-22 10:11:00"
         },
         {
             "name": "vlucas/phpdotenv",
