@@ -39,8 +39,13 @@ class DeleteContractService extends Service
             $params['type']  = "metadata";
             $params['id']    = $id;
 
-            return $this->deleteDocument($params);
+            $delete = $this->deleteDocument($params);
+            logger()->info("Metadata Deleted", $delete);
+
+            return $delete;
         } catch (Missing404Exception $e) {
+            logger()->error("Metadata not found", $e->getMessage());
+
             return "Metadata not found";
         }
     }
@@ -58,8 +63,13 @@ class DeleteContractService extends Service
             $params['type']                                 = "pdf_text";
             $params['body']['query']['term']['contract_id'] = $id;
 
-            return $this->deleteDocumentByQuery($params);
+            $delete = $this->deleteDocumentByQuery($params);
+            logger()->info("Pdf Text Deleted", $delete);
+
+            return $delete;
         } catch (Missing404Exception $e) {
+            logger()->error("Pdf text not found", $e->getMessage());
+
             return "Text not found";
         }
 
@@ -77,8 +87,12 @@ class DeleteContractService extends Service
             $params['type']                                 = "annotations";
             $params['body']['query']['term']['contract_id'] = $id;
 
-            return $this->deleteDocumentByQuery($params);
+            $delete = $this->deleteDocumentByQuery($params);
+            logger()->info("Annotations deleted", $params);
+
+            return $delete;
         } catch (Missing404Exception $e) {
+            logger()->error("Annotaions not found", $e->getMessage());
 
             return "Annotations not found";
         }
@@ -95,9 +109,12 @@ class DeleteContractService extends Service
             $params['index'] = $this->index;
             $params['type']  = "master";
             $params['id']    = $id;
+            $delete          = $this->deleteDocument($params);
+            logger()->info("Master Deleted", $delete);
 
-            return $this->deleteDocument($params);
+            return $delete;
         } catch (Missing404Exception $e) {
+            logger()->error("Master Not found", $e->getMessage());
 
             return "Master not found";
         }
