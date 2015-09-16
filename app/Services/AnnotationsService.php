@@ -19,6 +19,7 @@ class AnnotationsService extends Service
      */
     public function index($request)
     {
+
         try {
 
             $annotations = json_decode($request['annotations'], true);
@@ -52,9 +53,10 @@ class AnnotationsService extends Service
 
 
         } catch (\Exception $e) {
-            logger()->error("Annotations index error", $e->getMessage());
+            logger()->error("Annotations index error",[$e->getMessage()]);
+            return [$e->getMessage()];
 
-            return $e->getMessage();
+
         }
     }
 
@@ -96,9 +98,9 @@ class AnnotationsService extends Service
 
             return $response;
         } catch (\Exception $e) {
-            logger()->error("Annotations error while inserting in master", $e->getMessage());
+            logger()->error("Annotations error while inserting in master", [$e->getMessage()]);
 
-            return $e->getMessage();
+            return [$e->getMessage()];
         }
     }
 

@@ -5,3 +5,4 @@ $router->addRoute('POST', '/contract/metadata', 'App\Controllers\ApiController::
 $router->addRoute('POST', '/contract/pdf-text', 'App\Controllers\ApiController::pdfText');
 $router->addRoute('POST', '/contract/annotations', 'App\Controllers\ApiController::annotation');
 $router->addRoute('POST', '/contract/delete', 'App\Controllers\ApiController::deleteContract');
+$router->addRoute('POST', '/contract/delete/annotation', 'App\Controllers\ApiController::deleteContractAnnotation');

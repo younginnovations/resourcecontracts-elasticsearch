@@ -22,7 +22,6 @@ class PdfTextService extends Service
      */
     public function index($textData)
     {
-        logger()->info("",$textData);
         try {
             $data     = json_decode($textData['pages'], true);
             $metadata = json_decode($textData['metadata'], true);
@@ -58,9 +57,9 @@ class PdfTextService extends Service
             return array_merge($response, $master);
 
         } catch (\Exception $e) {
-            logger()->error("Pdf text document not created", $e->getMessage());
+            logger()->error("Pdf text document not created", [$e->getMessage()]);
 
-            return $e->getMessage();
+            return [$e->getMessage()];
         }
     }
 
@@ -100,9 +99,9 @@ class PdfTextService extends Service
 
             return $response;
         } catch (Exception $e) {
-            logger()->error("Error while indexing pdf text in master", $e->getMessage());
+            logger()->error("Error while indexing pdf text in master", [$e->getMessage()]);
 
-            return $e->getMessage();
+            return [$e->getMessage()];
         }
     }
 
