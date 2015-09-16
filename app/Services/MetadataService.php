@@ -68,7 +68,7 @@ class MetadataService extends Service
             //return array_merge($response, $master);
 
         } catch (\Exception $e) {
-            logger()->error("Metadata Index Error", $e->getMessage());
+            logger()->error("Metadata Index Error", [$e->getMessage()]);
 
             return [$e->getMessage()];
 
@@ -129,7 +129,7 @@ class MetadataService extends Service
             // logger()->info("Master Index created",$response);
             return $response;
         } catch (\Exception $e) {
-            logger()->error("Error while indexing Metadata in master", $e->getMessage());
+            logger()->error("Error while indexing Metadata in master", [$e->getMessage()]);
 
             return [$e->getMessage()];
         }
@@ -456,9 +456,9 @@ class MetadataService extends Service
 
             return $meadata;
         } catch (\Exception $e) {
-            logger()->error("Metadata Mapping Error", $e->getMessage());
+            logger()->error("Metadata Mapping Error", (array)$e->getMessage());
 
-            return $e->getMessage();
+            return (array)$e->getMessage();
         }
     }
 
@@ -543,9 +543,9 @@ class MetadataService extends Service
 
             return $masterIndex;
         } catch (\Exception $e) {
-            logger()->error("Master Index Erro", $e->getMessage());
+            logger()->error("Master Index Erro", [$e->getMessage()]);
 
-            return $e->getMessage();
+            return [$e->getMessage()];
         }
     }
 }

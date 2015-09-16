@@ -98,4 +98,17 @@ class ApiController extends BaseController
         return $this->json(['failed']);
     }
 
+    /**
+     * Delete contract annotations
+     */
+    public function deleteContractAnnotation()
+    {
+        $contract   = new DeleteContractService();
+        $contractId = $this->request->request->all();
+        if ($response = $contract->deleteAnnotations($contractId['contract_id'])) {
+            return $this->json($response);
+        }
+        return $this->json(['failed']);
+    }
+
 }

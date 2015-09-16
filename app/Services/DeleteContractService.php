@@ -32,7 +32,7 @@ class DeleteContractService extends Service
      * @param $id
      * @return array
      */
-    private function deleteMetadata($id)
+    public function deleteMetadata($id)
     {
         try {
             $params['index'] = $this->index;
@@ -44,7 +44,7 @@ class DeleteContractService extends Service
 
             return $delete;
         } catch (Missing404Exception $e) {
-            logger()->error("Metadata not found", $e->getMessage());
+            logger()->error("Metadata not found", [$e->getMessage()]);
 
             return "Metadata not found";
         }
@@ -56,7 +56,7 @@ class DeleteContractService extends Service
      * @param $id
      * @return array
      */
-    private function deletePdfText($id)
+    public function deletePdfText($id)
     {
         try {
             $params['index']                                = $this->index;
@@ -68,7 +68,7 @@ class DeleteContractService extends Service
 
             return $delete;
         } catch (Missing404Exception $e) {
-            logger()->error("Pdf text not found", $e->getMessage());
+            logger()->error("Pdf text not found", [$e->getMessage()]);
 
             return "Text not found";
         }
@@ -80,7 +80,7 @@ class DeleteContractService extends Service
      * @param $id
      * @return array
      */
-    private function deleteAnnotations($id)
+    public function deleteAnnotations($id)
     {
         try {
             $params['index']                                = $this->index;
@@ -88,11 +88,11 @@ class DeleteContractService extends Service
             $params['body']['query']['term']['contract_id'] = $id;
 
             $delete = $this->deleteDocumentByQuery($params);
-            logger()->info("Annotations deleted", $params);
+            logger()->info("Annotations deleted", $delete);
 
             return $delete;
         } catch (Missing404Exception $e) {
-            logger()->error("Annotaions not found", $e->getMessage());
+            logger()->error("Annotaions not found", [$e->getMessage()]);
 
             return "Annotations not found";
         }
@@ -103,7 +103,7 @@ class DeleteContractService extends Service
      * @param $id
      * @return array
      */
-    private function deleteMaster($id)
+    public function deleteMaster($id)
     {
         try {
             $params['index'] = $this->index;
@@ -114,7 +114,7 @@ class DeleteContractService extends Service
 
             return $delete;
         } catch (Missing404Exception $e) {
-            logger()->error("Master Not found", $e->getMessage());
+            logger()->error("Master Not found", [$e->getMessage()]);
 
             return "Master not found";
         }
