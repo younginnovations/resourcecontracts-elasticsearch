@@ -53,7 +53,8 @@ class AnnotationsService extends Service
 
 
         } catch (\Exception $e) {
-            logger()->error("Annotations index error",[$e->getMessage()]);
+            logger()->error("Annotations index error", [$e->getMessage()]);
+
             return [$e->getMessage()];
 
 
@@ -131,7 +132,27 @@ class AnnotationsService extends Service
         foreach ($annotations as $annotation) {
             array_push($category, $annotation['category']);
         }
+        $data = array_unique($category);
+        $data = $this->removeKeys($data);
 
-        return array_unique($category);
+        return $data;
     }
+
+    /**
+     * Remove Keys From Array
+     *
+     * @param $items
+     * @return array
+     */
+    protected function removeKeys($items)
+    {
+        $i = [];
+
+        foreach ($items as $items) {
+            $i[] = $items;
+        }
+
+        return $i;
+    }
+
 }

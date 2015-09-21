@@ -219,19 +219,19 @@ class MetadataService extends Service
                                     ],
                                 'properties'  =>
                                     [
-                                        'contract_name'         =>
+                                        'contract_name'       =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'contract_idenfifier'   =>
+                                        'contract_idenfifier' =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'language'              =>
+                                        'language'            =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'country'               =>
+                                        'country'             =>
                                             [
                                                 'properties' =>
                                                     [
@@ -245,40 +245,46 @@ class MetadataService extends Service
                                                             ],
                                                     ],
                                             ],
-                                        'resource'              =>
+                                        'resource'            =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'government_entity'     =>
+                                        'government_entity'   =>
+                                            [
+                                                'properties' =>
+                                                    [
+                                                        'entity'     =>
+                                                            [
+                                                                'type' => 'string'
+                                                            ],
+                                                        'identifier' =>
+                                                            [
+                                                                'type' => 'string'
+                                                            ]
+                                                    ]
+                                            ],
+                                        'type_of_contract'    =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'government_identifier' =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'type_of_contract'      =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'signature_date'        =>
+                                        'signature_date'      =>
                                             [
                                                 'type'   => 'date',
                                                 'format' => 'dateOptionalTime',
                                             ],
-                                        'signature_year'        =>
+                                        'signature_year'      =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'document_type'         =>
+                                        'document_type'       =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'translation_parent'    =>
+                                        'translation_parent'  =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'company'               =>
+                                        'company'             =>
                                             [
                                                 'properties' =>
                                                     [
@@ -325,15 +331,15 @@ class MetadataService extends Service
                                                             ],
                                                     ],
                                             ],
-                                        'project_title'         =>
+                                        'project_title'       =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'project_identifier'    =>
+                                        'project_identifier'  =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'concession'            =>
+                                        'concession'          =>
                                             [
                                                 'properties' =>
                                                     [
@@ -347,24 +353,24 @@ class MetadataService extends Service
                                                             ],
                                                     ],
                                             ],
-                                        'source_url'            =>
+                                        'source_url'          =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'disclosure_mode'       =>
+                                        'disclosure_mode'     =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'date_retrieval'        =>
+                                        'date_retrieval'      =>
                                             [
                                                 'type'   => 'date',
                                                 'format' => 'dateOptionalTime',
                                             ],
-                                        'category'              =>
+                                        'category'            =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'translated_from'       =>
+                                        'translated_from'     =>
                                             [
                                                 'properties' =>
                                                     [
@@ -456,9 +462,9 @@ class MetadataService extends Service
 
             return $meadata;
         } catch (\Exception $e) {
-            logger()->error("Metadata Mapping Error", (array)$e->getMessage());
+            logger()->error("Metadata Mapping Error", (array) $e->getMessage());
 
-            return (array)$e->getMessage();
+            return (array) $e->getMessage();
         }
     }
 
