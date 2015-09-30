@@ -223,6 +223,10 @@ class MetadataService extends Service
                                             [
                                                 'type' => 'string',
                                             ],
+                                        'show_pdf_text'       =>
+                                            [
+                                                'type' => 'integer'
+                                            ],
                                         'contract_idenfifier' =>
                                             [
                                                 'type' => 'string',
