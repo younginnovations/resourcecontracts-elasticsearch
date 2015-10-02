@@ -6,15 +6,16 @@ NRGI-Elasticsearch API can be cloned from gitlab repository and installed. Follo
 
 * git clone git@gitlab.yipl.com.np:web-apps/rces.git
 * cd rces
-* add `127.0.0.1 rces.dev` to your `/etc/hosts` file
-* change your apache host file
-* restart apache server
+
 
 ## Run
 
 The app can be run with the command below:
 
 * install the application dependencies using command: `composer install`
+* copy .env.example to .env and update your configuration .
+* run php server ie. `php -S localhost:8001`
+* make sure elasticsearch is running .
 
 ## Setup Elasticsearch
 
