@@ -138,20 +138,21 @@ class MetadataService extends Service
     public function filterMetadata($metadata)
     {
 
-        $data                       = [];
-        $data['contract_name']      = $metadata->contract_name;
-        $data['country_name']       = $metadata->country->name;
-        $data['country_code']       = $metadata->country->code;
-        $data['signature_year']     = $metadata->signature_year;
-        $data['signature_date']     = $metadata->signature_date;
-        $data['resource']           = $metadata->resource;
-        $data['file_size']          = $metadata->file_size;
-        $data['language']           = $metadata->language;
-        $data['category']           = $metadata->category;
-        $data['contract_type']      = $metadata->type_of_contract;
-        $data['resource_raw']       = $data['resource'];
-        $data['company_name']       = [];
-        $data['corporate_grouping'] = [];
+        $data                        = [];
+        $data['contract_name']       = $metadata->contract_name;
+        $data['open_contracting_id'] = $metadata->open_contracting_id;
+        $data['country_name']        = $metadata->country->name;
+        $data['country_code']        = $metadata->country->code;
+        $data['signature_year']      = $metadata->signature_year;
+        $data['signature_date']      = $metadata->signature_date;
+        $data['resource']            = $metadata->resource;
+        $data['file_size']           = $metadata->file_size;
+        $data['language']            = $metadata->language;
+        $data['category']            = $metadata->category;
+        $data['contract_type']       = $metadata->type_of_contract;
+        $data['resource_raw']        = $data['resource'];
+        $data['company_name']        = [];
+        $data['corporate_grouping']  = [];
 
         foreach ($metadata->company as $company) {
             if ($company->name != "") {
@@ -221,7 +222,14 @@ class MetadataService extends Service
                                     [
                                         'contract_name'       =>
                                             [
-                                                'type' => 'string',
+                                                'type'     => 'string',
+                                                "analyzer" => "english",
+                                                "fields"   => [
+                                                    "raw" => [
+                                                        "type"  => "string",
+                                                        "index" => "not_analyzed"
+                                                    ]
+                                                ]
                                             ],
                                         'show_pdf_text'       =>
                                             [
@@ -269,7 +277,14 @@ class MetadataService extends Service
                                             ],
                                         'type_of_contract'    =>
                                             [
-                                                'type' => 'string',
+                                                'type'     => 'string',
+                                                "analyzer" => "english",
+                                                "fields"   => [
+                                                    "raw" => [
+                                                        "type"  => "string",
+                                                        "index" => "not_analyzed"
+                                                    ]
+                                                ]
                                             ],
                                         'signature_date'      =>
                                             [
@@ -485,47 +500,59 @@ class MetadataService extends Service
                 "properties" => [
                     "metadata"             => [
                         "properties" => [
-                            "contract_name"      => [
+                            "contract_name"       => [
+                                "type"     => "string",
+                                "analyzer" => "english",
+                                "fields"   => [
+                                    "raw" => [
+                                        "type"  => "string",
+                                        "index" => "not_analyzed"
+                                    ]
+                                ]
+
+                            ],
+                            "open_contracting_id" => [
                                 "type" => "string"
                             ],
-                            "country_name"       => [
+                            "country_name"        => [
+                                "type"  => "string",
+                                "index" => "not_analyzed"
+                            ],
+                            "country_code"        => [
                                 "type" => "string"
                             ],
-                            "country_code"       => [
+                            "signature_year"      => [
                                 "type" => "string"
                             ],
-                            "signature_year"     => [
-                                "type" => "string"
-                            ],
-                            "signature_date"     => [
+                            "signature_date"      => [
                                 'type'   => 'date',
                                 'format' => 'dateOptionalTime',
                             ],
-                            "resource"           => [
+                            "resource"            => [
                                 "type" => "string"
                             ],
-                            "resource_raw"       => [
+                            "resource_raw"        => [
                                 "type"  => "string",
                                 'index' => 'not_analyzed'
                             ],
-                            "file_size"          => [
+                            "file_size"           => [
                                 "type" => "integer",
                             ],
-                            "language"           => [
+                            "language"            => [
                                 "type" => "string"
                             ],
-                            "category"           => [
+                            "category"            => [
                                 "type" => "string"
                             ],
-                            "contract_type"      => [
+                            "contract_type"       => [
                                 "type"  => "string",
                                 "index" => "not_analyzed"
                             ],
-                            "company_name"       => [
+                            "company_name"        => [
                                 "type"  => "string",
                                 "index" => "not_analyzed"
                             ],
-                            "corporate_grouping" => [
+                            "corporate_grouping"  => [
                                 "type"  => "string",
                                 "index" => "not_analyzed"
                             ]
