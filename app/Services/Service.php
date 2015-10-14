@@ -21,11 +21,13 @@ class Service
      */
     protected $es;
 
+
     function __construct()
     {
+        $hosts       = [env('ELASTICSEARCH_SERVER')];
         $this->index = env('INDEX');
-        $client   = new ClientBuilder();
-        $this->es = $client->create()->build();
+        $client      = ClientBuilder::create()->setHosts($hosts);
+        $this->es    = $client->build();
     }
 
     /**
