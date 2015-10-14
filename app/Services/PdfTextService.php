@@ -36,11 +36,12 @@ class PdfTextService extends Service
                 $param       = $this->getIndexType();
                 $param['id'] = $text['id'];
                 $doc         = [
-                    'metadata'    => $metadata,
-                    'page_no'     => (integer) $text['page_no'],
-                    "contract_id" => (integer) $textData['contract_id'],
-                    "text"        => $text['text'],
-                    "pdf_url"     => $text['pdf_url'],
+                    'metadata'            => $metadata,
+                    'page_no'             => (integer) $text['page_no'],
+                    'open_contracting_id' => $textData['open_contracting_id'],
+                    "contract_id"         => (integer) $textData['contract_id'],
+                    "text"                => $text['text'],
+                    "pdf_url"             => $text['pdf_url'],
                 ];
                 $document    = $this->es->exists($param);
                 if ($document) {
