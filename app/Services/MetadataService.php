@@ -190,8 +190,10 @@ class MetadataService extends Service
         $condition = $this->es->indices()->exists(['index' => $this->index]);
         if (!$condition) {
             $this->es->indices()->create(['index' => $this->index]);
-            $metadata = $this->createMetadataMapping();
-            $master   = $this->createMasterMapping();
+            $metadata    = $this->createMetadataMapping();
+            $master      = $this->createMasterMapping();
+            $annotations = $this->createAnnotationsMapping();
+            $pdftext     = $this->createPdfTextMapping();
 
             return true;
         }
@@ -231,11 +233,15 @@ class MetadataService extends Service
                                                     ]
                                                 ]
                                             ],
+                                        "open_contracting_id" => [
+                                            "type" => "string",
+                                            "index" =>"not_analyzed"
+                                        ],
                                         'show_pdf_text'       =>
                                             [
                                                 'type' => 'integer'
                                             ],
-                                        'contract_idenfifier' =>
+                                        'contract_identifier' =>
                                             [
                                                 'type' => 'string',
                                             ],
@@ -512,7 +518,8 @@ class MetadataService extends Service
 
                             ],
                             "open_contracting_id" => [
-                                "type" => "string"
+                                "type" => "string",
+                                "index" =>"not_analyzed"
                             ],
                             "country_name"        => [
                                 "type"  => "string",
@@ -581,6 +588,66 @@ class MetadataService extends Service
             return $masterIndex;
         } catch (\Exception $e) {
             logger()->error("Master Index Erro", [$e->getMessage()]);
+
+            return [$e->getMessage()];
+        }
+    }
+
+    /**
+     * Create Master Mapping
+     */
+    private function createAnnotationsMapping()
+    {
+        try {
+            $params['index'] = $this->index;
+            $this->es->indices()->refresh($params);
+            $params['type'] = "annotations";
+            $mapping        = [
+                "properties" => [
+                    "open_contracting_id" => [
+                        "type"  => "string",
+                        "index" => "not_analyzed"
+                    ]
+                ]
+            ];
+
+            $params['body']["annotations"] = $mapping;
+            $annotationsIndex              = $this->es->indices()->putMapping($params);
+            logger()->info("Annotations mapping created", $annotationsIndex);
+
+            return $annotationsIndex;
+        } catch (\Exception $e) {
+            logger()->error("Annotations Mapping Error", [$e->getMessage()]);
+
+            return [$e->getMessage()];
+        }
+    }
+
+    /**
+     * Create PdfText Mapping
+     */
+    private function createPdfTextMapping()
+    {
+        try {
+            $params['index'] = $this->index;
+            $this->es->indices()->refresh($params);
+            $params['type'] = "pdf_text";
+            $mapping        = [
+                "properties" => [
+                    "open_contracting_id" => [
+                        "type"  => "string",
+                        "index" => "not_analyzed"
+                    ]
+                ]
+            ];
+
+            $params['body']["pdf_text"] = $mapping;
+            $pdftext                    = $this->es->indices()->putMapping($params);
+            logger()->info("Pdf Text mapping created", $pdftext);
+
+            return $pdftext;
+        } catch (\Exception $e) {
+            logger()->error("Pdf Text Mapping Error", [$e->getMessage()]);
 
             return [$e->getMessage()];
         }
