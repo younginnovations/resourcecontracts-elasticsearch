@@ -234,8 +234,8 @@ class MetadataService extends Service
                                                 ]
                                             ],
                                         "open_contracting_id" => [
-                                            "type" => "string",
-                                            "index" =>"not_analyzed"
+                                            "type"  => "string",
+                                            "index" => "not_analyzed"
                                         ],
                                         'show_pdf_text'       =>
                                             [
@@ -259,7 +259,14 @@ class MetadataService extends Service
                                                             ],
                                                         'name' =>
                                                             [
-                                                                'type' => 'string',
+                                                                'type'     => 'string',
+                                                                "analyzer" => "english",
+                                                                "fields"   => [
+                                                                    "raw" => [
+                                                                        "type"  => "string",
+                                                                        "index" => "not_analyzed"
+                                                                    ]
+                                                                ]
                                                             ],
                                                     ],
                                             ],
@@ -518,8 +525,8 @@ class MetadataService extends Service
 
                             ],
                             "open_contracting_id" => [
-                                "type" => "string",
-                                "index" =>"not_analyzed"
+                                "type"  => "string",
+                                "index" => "not_analyzed"
                             ],
                             "country_name"        => [
                                 "type"  => "string",
