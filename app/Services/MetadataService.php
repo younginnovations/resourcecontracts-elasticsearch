@@ -614,7 +614,18 @@ class MetadataService extends Service
                     "open_contracting_id" => [
                         "type"  => "string",
                         "index" => "not_analyzed"
-                    ]
+                    ],
+                    'category'            =>
+                        [
+                            'type'     => 'string',
+                            "analyzer" => "english",
+                            "fields"   => [
+                                "raw" => [
+                                    "type"  => "string",
+                                    "index" => "not_analyzed"
+                                ]
+                            ]
+                        ],
                 ]
             ];
 
@@ -644,7 +655,7 @@ class MetadataService extends Service
                     "open_contracting_id" => [
                         "type"  => "string",
                         "index" => "not_analyzed"
-                    ]
+                    ],
                 ]
             ];
 
@@ -659,4 +670,5 @@ class MetadataService extends Service
             return [$e->getMessage()];
         }
     }
+
 }
