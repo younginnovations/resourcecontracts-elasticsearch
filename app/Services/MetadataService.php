@@ -65,7 +65,7 @@ class MetadataService extends Service
             $response       = $this->es->index($params);
             logger()->info("Metadata Index created", $response);
 
-            //return array_merge($response, $master);
+            return array_merge($response, $master);
 
         } catch (\Exception $e) {
             logger()->error("Metadata Index Error", [$e->getMessage()]);
