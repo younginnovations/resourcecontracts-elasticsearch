@@ -151,6 +151,7 @@ class MetadataService extends Service
         $data['category']            = $metadata->category;
         $data['contract_type']       = $metadata->type_of_contract;
         $data['resource_raw']        = $data['resource'];
+        $data['show_pdf_text']       = $metadata->show_pdf_text;
         $data['company_name']        = [];
         $data['corporate_grouping']  = [];
 
