@@ -150,6 +150,7 @@ class MetadataService extends Service
         $data['language']            = $metadata->language;
         $data['category']            = $metadata->category;
         $data['contract_type']       = $metadata->type_of_contract;
+        $data['document_type']       = $metadata->document_type;
         $data['resource_raw']        = $data['resource'];
         $data['show_pdf_text']       = $metadata->show_pdf_text;
         $data['company_name']        = [];
@@ -300,16 +301,23 @@ class MetadataService extends Service
                                                     ]
                                                 ]
                                             ],
+                                        'document_type'       =>
+                                            [
+                                                'type'     => 'string',
+                                                "analyzer" => "english",
+                                                "fields"   => [
+                                                    "raw" => [
+                                                        "type"  => "string",
+                                                        "index" => "not_analyzed"
+                                                    ]
+                                                ]
+                                            ],
                                         'signature_date'      =>
                                             [
                                                 'type'   => 'date',
                                                 'format' => 'dateOptionalTime',
                                             ],
                                         'signature_year'      =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'document_type'       =>
                                             [
                                                 'type' => 'string',
                                             ],
@@ -563,6 +571,17 @@ class MetadataService extends Service
                                 "type"  => "string",
                                 "index" => "not_analyzed"
                             ],
+                            'document_type'       =>
+                                [
+                                    'type'     => 'string',
+                                    "analyzer" => "english",
+                                    "fields"   => [
+                                        "raw" => [
+                                            "type"  => "string",
+                                            "index" => "not_analyzed"
+                                        ]
+                                    ]
+                                ],
                             "company_name"        => [
                                 "type"  => "string",
                                 "index" => "not_analyzed"
