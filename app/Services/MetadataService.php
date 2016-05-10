@@ -82,7 +82,7 @@ class MetadataService extends Service
     {
         $params['index'] = $this->index;
         $params['type']  = "pdf_text";
-        $params['body']  = ['query' => ["term" => ["contract_id" => ["value" => $id]]]];
+        $params['body']  = ['size'  => 10000,'query' => ["term" => ["contract_id" => ["value" => $id]]]];
         $results         = $this->es->search($params);
         $results         = $results['hits']['hits'];
         $response        = [];
@@ -104,7 +104,7 @@ class MetadataService extends Service
     {
         $params['index'] = $this->index;
         $params['type']  = "annotations";
-        $params['body']  = ['query' => ["term" => ["contract_id" => ["value" => $id]]]];
+        $params['body']  = ['size'  => 10000,'query' => ["term" => ["contract_id" => ["value" => $id]]]];
         $results         = $this->es->search($params);
         $results         = $results['hits']['hits'];
         $response        = [];
