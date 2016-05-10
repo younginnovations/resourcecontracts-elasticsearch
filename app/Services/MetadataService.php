@@ -55,11 +55,12 @@ class MetadataService extends Service
             if ($document) {
                 $params['body']['doc'] = $data;
 
-                $response = $this->es->update($params);
+                $response    = $this->es->update($params);
+                $uText       = $this->updateTextOCID($params['id'], $metadata->open_contracting_id);
+                $uAnnotation = $this->updateAnnotationOCID($params['id'], $metadata->open_contracting_id);
+                logger()->info("Metadata Index updated", array_merge($response, $master, $uText, $uAnnotation));
 
-                //logger()->info("Metadata Index updated",$response);
-
-                return array_merge($response, $master);
+                return array_merge($response, $master, $uText, $uAnnotation);
             }
             $params['body'] = $data;
             $response       = $this->es->index($params);
@@ -73,6 +74,50 @@ class MetadataService extends Service
             return [$e->getMessage()];
 
         }
+
+    }
+
+
+    public function updateTextOCID($id, $ocid)
+    {
+        $params['index'] = $this->index;
+        $params['type']  = "pdf_text";
+        $params['body']  = ['query' => ["term" => ["contract_id" => ["value" => $id]]]];
+        $results         = $this->es->search($params);
+        $results         = $results['hits']['hits'];
+        $response        = [];
+        foreach ($results as $result) {
+            $uParam['index']       = $this->index;
+            $uParam['type']        = 'pdf_text';
+            $uParam['id']          = $result['_id'];
+            $uParam['body']['doc'] = ['open_contracting_id' => $ocid];
+            $res                   = $this->es->update($uParam);
+            array_push($response, $res);
+        }
+
+        return $response;
+
+    }
+
+
+    public function updateAnnotationOCID($id, $ocid)
+    {
+        $params['index'] = $this->index;
+        $params['type']  = "annotations";
+        $params['body']  = ['query' => ["term" => ["contract_id" => ["value" => $id]]]];
+        $results         = $this->es->search($params);
+        $results         = $results['hits']['hits'];
+        $response        = [];
+        foreach ($results as $result) {
+            $uParam['index']       = $this->index;
+            $uParam['type']        = 'annotations';
+            $uParam['id']          = $result['_id'];
+            $uParam['body']['doc'] = ['open_contracting_id' => $ocid];
+            $res                   = $this->es->update($uParam);
+            array_push($response, $res);
+        }
+
+        return $response;
 
     }
 
