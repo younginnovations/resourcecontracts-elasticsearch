@@ -110,11 +110,8 @@ class AnnotationsService extends Service
 
         $data = '';
         foreach ($annotations as $annotation) {
-            $quote    = isset($annotation['quote']) ? $annotation['quote'] : "";
             $text     = isset($annotation['text']) ? $annotation['text'] : "";
-            $category = isset($annotation['category']) ? $annotation['category'] : "";
-            $data .= ' ' . $quote . ' ' . $text . ' ' . $category;
-
+            $data .= ' '.$text;
         }
 
         return $data;
