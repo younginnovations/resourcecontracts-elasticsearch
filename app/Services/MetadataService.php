@@ -82,7 +82,7 @@ class MetadataService extends Service
     {
         $params['index'] = $this->index;
         $params['type']  = "pdf_text";
-        $params['body']  = ['size'  => 10000,'query' => ["term" => ["contract_id" => ["value" => $id]]]];
+        $params['body']  = ['size' => 10000, 'query' => ["term" => ["contract_id" => ["value" => $id]]]];
         $results         = $this->es->search($params);
         $results         = $results['hits']['hits'];
         $response        = [];
@@ -104,7 +104,7 @@ class MetadataService extends Service
     {
         $params['index'] = $this->index;
         $params['type']  = "annotations";
-        $params['body']  = ['size'  => 10000,'query' => ["term" => ["contract_id" => ["value" => $id]]]];
+        $params['body']  = ['size' => 10000, 'query' => ["term" => ["contract_id" => ["value" => $id]]]];
         $results         = $this->es->search($params);
         $results         = $results['hits']['hits'];
         $response        = [];
@@ -148,9 +148,10 @@ class MetadataService extends Service
             $params['type']  = "master";
             $params['id']    = $contracId;
             $document        = $this->es->exists($params);
+            $metadataString       = $this->removeURL($metadata);
             $body            = [
                 "metadata"             => $this->filterMetadata($metadata),
-                "metadata_string"      => $this->getMetadataString($metadata),
+                "metadata_string"      => $this->getMetadataString($metadataString),
                 "pdf_text_string"      => [],
                 "annotations_category" => [],
                 "annotations_string"   => []
@@ -159,12 +160,12 @@ class MetadataService extends Service
             if ($document) {
                 $params['body']['doc'] = [
                     "metadata"        => $this->filterMetadata($metadata),
-                    "metadata_string" => $this->getMetadataString($metadata)
+                    "metadata_string" => $this->getMetadataString($metadataString)
                 ];
 
                 $response = $this->es->update($params);
 
-                //logger()->info("Master Index updated",$response);
+                //-logger()->info("Master Index updated",$response);
                 return $response;
             }
             $params['body'] = $body;
@@ -216,6 +217,7 @@ class MetadataService extends Service
 
     private function getMetadataString($metadata, $data = '')
     {
+
         foreach ($metadata as $value) {
             if (is_array($value) || is_object($value)) {
                 $data = $this->getMetadataString($value, $data);
@@ -226,7 +228,33 @@ class MetadataService extends Service
             }
         }
 
-        return $data;
+        return trim($data);
+    }
+
+    /**
+     * Remove url from metadata
+     * @param $metadata
+     * @return array $metadata
+     */
+    public function removeURL($metadata)
+    {
+        try {
+            unset($metadata->source_url, $metadata->amla_url, $metadata->file_url, $metadata->word_file);
+            $i = 0;
+            foreach ($metadata->company as $company) {
+                unset($metadata->company[$i]->open_corporate_id);
+                $i ++;
+            }
+            logger()->info("URL removed metadata", (array) $metadata);
+
+            return $metadata;
+        } catch (Exception $e) {
+            logger()->error("Error URL removed metadata", [$e->getMessage()]);
+
+            return [];
+        }
+
+
     }
 
     /**

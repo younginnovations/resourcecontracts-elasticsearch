@@ -114,7 +114,7 @@ class AnnotationsService extends Service
             $data .= ' '.$text;
         }
 
-        return $data;
+        return trim($data);
     }
 
     /**

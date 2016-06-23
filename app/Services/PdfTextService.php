@@ -114,7 +114,7 @@ class PdfTextService extends Service
             $data .= strip_tags($text['text']) . ' ';
         }
 
-        return $data;
+        return trim($data);
     }
 
 
