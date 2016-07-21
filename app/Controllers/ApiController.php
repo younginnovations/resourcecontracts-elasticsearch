@@ -108,6 +108,37 @@ class ApiController extends BaseController
         if ($response = $contract->deleteAnnotations($contractId['contract_id'])) {
             return $this->json($response);
         }
+
+        return $this->json(['failed']);
+    }
+
+    /**
+     * Delete contract's document from metadata and master
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function deleteContractMetadata()
+    {
+        $contract   = new DeleteContractService();
+        $contractId = $this->request->request->all();
+        if ($response = $contract->deleteMetadata($contractId['contract_id']) && $contract->deleteMaster($contractId['contract_id'])) {
+            return $this->json($response);
+        }
+
+        return $this->json(['failed']);
+    }
+
+    /**
+     * Delete text document from pdf_text
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function deleteContractText()
+    {
+        $contract   = new DeleteContractService();
+        $contractId = $this->request->request->all();
+        if ($response = $contract->deletePdfText($contractId['contract_id'])) {
+            return $this->json($response);
+        }
+
         return $this->json(['failed']);
     }
 

@@ -10,6 +10,16 @@ use League\Route\Http\Exception;
  */
 class DeleteContractService extends Service
 {
+    /**
+     * @var MetadataService
+     */
+    private $meta;
+
+    /**
+     * @param MetadataService $meta
+     * @param PdfTextService  $textService
+     */
+
 
     /**
      * Delete Contract
@@ -64,6 +74,7 @@ class DeleteContractService extends Service
             $params['body']['query']['term']['contract_id'] = $id;
 
             $delete = $this->deleteDocumentByQuery($params);
+            $this->updateTextInMaster($id);
             logger()->info("Pdf Text Deleted", $delete);
 
             return $delete;
@@ -88,6 +99,7 @@ class DeleteContractService extends Service
             $params['body']['query']['term']['contract_id'] = $id;
 
             $delete = $this->deleteDocumentByQuery($params);
+            $this->updateAnnotationInMaster($id);
             logger()->info("Annotations deleted", $delete);
 
             return $delete;
@@ -113,6 +125,59 @@ class DeleteContractService extends Service
             logger()->info("Master Deleted", $delete);
 
             return $delete;
+        } catch (Missing404Exception $e) {
+            logger()->error("Master Not found", [$e->getMessage()]);
+
+            return "Master not found";
+        }
+    }
+
+    /**
+     * Delete text from master
+     * @param $id
+     * @return array|string
+     */
+    public function updateTextInMaster($id)
+    {
+        try {
+            $params['index']       = $this->index;
+            $params['type']        = "master";
+            $params['id']          = $id;
+            $params['body']['doc'] = [
+                "pdf_text_string" => ""
+            ];
+
+            $response = $this->es->update($params);
+            logger()->info("Text deleted from master", $response);
+
+            return $response;
+        } catch (Missing404Exception $e) {
+            logger()->error("Master Not found", [$e->getMessage()]);
+
+            return "Master not found";
+        }
+    }
+
+    /**
+     * Delete annotation's text and annotation category from master
+     * @param $id
+     * @return array|string
+     */
+    public function updateAnnotationInMaster($id)
+    {
+        try {
+            $params['index']       = $this->index;
+            $params['type']        = "master";
+            $params['id']          = $id;
+            $params['body']['doc'] = [
+                "annotations_category" => "",
+                "annotations_string"   => ""
+            ];
+
+            $response = $this->es->update($params);
+            logger()->info("Annotation deleted from master", $response);
+
+            return $response;
         } catch (Missing404Exception $e) {
             logger()->error("Master Not found", [$e->getMessage()]);
 
