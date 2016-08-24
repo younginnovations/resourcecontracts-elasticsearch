@@ -721,6 +721,16 @@ class MetadataService extends Service
                                 ]
                             ]
                         ],
+                    'created_at'           =>
+                        [
+                            'type'   => 'date',
+                            'format' => 'dateOptionalTime',
+                        ],
+                    'updated_at'           =>
+                        [
+                            'type'   => 'date',
+                            'format' => 'dateOptionalTime',
+                        ],
                 ]
             ];
 
@@ -751,6 +761,16 @@ class MetadataService extends Service
                         "type"  => "string",
                         "index" => "not_analyzed"
                     ],
+                    'created_at'           =>
+                        [
+                            'type'   => 'date',
+                            'format' => 'dateOptionalTime',
+                        ],
+                    'updated_at'           =>
+                        [
+                            'type'   => 'date',
+                            'format' => 'dateOptionalTime',
+                        ],
                 ]
             ];
 

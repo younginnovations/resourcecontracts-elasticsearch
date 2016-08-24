@@ -42,6 +42,8 @@ class PdfTextService extends Service
                     "contract_id"         => (integer) $textData['contract_id'],
                     "text"                => $text['text'],
                     "pdf_url"             => $text['pdf_url'],
+                    "created_at"          => isset($text['created_at']) ? $text['created_at'] : null,
+                    "updated_at"          => isset($text['updated_at']) ? $text['updated_at'] : null,
                 ];
                 $document    = $this->es->exists($param);
                 if ($document) {
