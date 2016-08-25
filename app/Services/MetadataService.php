@@ -42,14 +42,8 @@ class MetadataService extends Service
                 'created_user_email'   => $createdBy->email,
                 'resource_raw'         => $metadata->resource,
                 'supporting_contracts' => $metaData['supporting_contracts'],
-                'created_at'           => date('Y-m-d', strtotime($metaData['created_at'])) . 'T' . date(
-                        'H:i:s',
-                        strtotime($metaData['created_at'])
-                    ),
-                'updated_at'           => date('Y-m-d', strtotime($metaData['updated_at'])) . 'T' . date(
-                        'H:i:s',
-                        strtotime($metaData['updated_at'])
-                    ),
+                'created_at'           => $metaData['created_at'],
+                'updated_at'           => $metaData['updated_at'],
             ];
             if ($document) {
                 $params['body']['doc'] = $data;
@@ -556,12 +550,12 @@ class MetadataService extends Service
                         'created_at'           =>
                             [
                                 'type'   => 'date',
-                                'format' => 'dateOptionalTime',
+                                'format' => 'yyyy-MM-dd HH:mm:ss',
                             ],
                         'updated_at'           =>
                             [
                                 'type'   => 'date',
-                                'format' => 'dateOptionalTime',
+                                'format' => 'yyyy-MM-dd HH:mm:ss',
                             ],
                         'resource_raw'         =>
                             [
@@ -724,12 +718,12 @@ class MetadataService extends Service
                     'created_at'           =>
                         [
                             'type'   => 'date',
-                            'format' => 'dateOptionalTime',
+                            'format' => 'yyyy-MM-dd HH:mm:ss',
                         ],
                     'updated_at'           =>
                         [
                             'type'   => 'date',
-                            'format' => 'dateOptionalTime',
+                            'format' => 'yyyy-MM-dd HH:mm:ss',
                         ],
                 ]
             ];
@@ -764,12 +758,12 @@ class MetadataService extends Service
                     'created_at'           =>
                         [
                             'type'   => 'date',
-                            'format' => 'dateOptionalTime',
+                            'format' => 'yyyy-MM-dd HH:mm:ss',
                         ],
                     'updated_at'           =>
                         [
                             'type'   => 'date',
-                            'format' => 'dateOptionalTime',
+                            'format' => 'yyyy-MM-dd HH:mm:ss',
                         ],
                 ]
             ];
