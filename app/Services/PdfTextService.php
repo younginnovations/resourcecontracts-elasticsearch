@@ -36,7 +36,6 @@ class PdfTextService extends Service
                 $param       = $this->getIndexType();
                 $param['id'] = $text['id'];
                 $doc         = [
-                    'metadata'            => $metadata,
                     'page_no'             => (integer) $text['page_no'],
                     'open_contracting_id' => $textData['open_contracting_id'],
                     "contract_id"         => (integer) $textData['contract_id'],
