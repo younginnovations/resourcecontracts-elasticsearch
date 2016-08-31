@@ -24,7 +24,6 @@ class PdfTextService extends Service
     {
         try {
             $data     = json_decode($textData['pages'], true);
-            $metadata = json_decode($textData['metadata'], true);
             $master   = $this->insertIntoMaster($textData['contract_id'], $data);
             $year     = '';
             if (!empty($metadata['signature_date'])) {
