@@ -44,6 +44,7 @@ class MetadataService extends Service
                 'supporting_contracts' => $metaData['supporting_contracts'],
                 'created_at'           => $metaData['created_at'],
                 'updated_at'           => $metaData['updated_at'],
+                'external_source'      => isset($metadata['external_source']) ? $metadata['external_source'] : ''
             ];
             if ($document) {
                 $params['body']['doc'] = $data;
@@ -51,14 +52,14 @@ class MetadataService extends Service
                 $response    = $this->es->update($params);
                 $uText       = $this->updateTextOCID($params['id'], $metadata->open_contracting_id);
                 $uAnnotation = $this->updateAnnotationOCID($params['id'], $metadata->open_contracting_id);
-                $master       = $this->insertIntoMaster($metaData['id'], $metadata);
+                $master      = $this->insertIntoMaster($metaData['id'], $metadata);
                 logger()->info("Metadata Index updated", array_merge($response, $master, $uText, $uAnnotation));
 
                 return array_merge($response, $master, $uText, $uAnnotation);
             }
             $params['body'] = $data;
             $response       = $this->es->index($params);
-            $master       = $this->insertIntoMaster($metaData['id'], $metadata);
+            $master         = $this->insertIntoMaster($metaData['id'], $metadata);
 
             logger()->info("Metadata Index created", $response);
 
@@ -233,7 +234,7 @@ class MetadataService extends Service
      */
     public function removeURL($metadata)
     {
-        $metadatas=$metadata;
+        $metadatas = $metadata;
         try {
             unset($metadatas->source_url, $metadatas->amla_url, $metadatas->file_url, $metadatas->word_file);
             $i = 0;
@@ -562,6 +563,9 @@ class MetadataService extends Service
                                 'type'  => 'string',
                                 'index' => 'not_analyzed',
                             ],
+                        'external_source'      => [
+                            'type' => 'string'
+                        ]
                     ],
             ];
 
@@ -715,12 +719,12 @@ class MetadataService extends Service
                                 ]
                             ]
                         ],
-                    'created_at'           =>
+                    'created_at'          =>
                         [
                             'type'   => 'date',
                             'format' => 'yyyy-MM-dd HH:mm:ss',
                         ],
-                    'updated_at'           =>
+                    'updated_at'          =>
                         [
                             'type'   => 'date',
                             'format' => 'yyyy-MM-dd HH:mm:ss',
@@ -755,12 +759,12 @@ class MetadataService extends Service
                         "type"  => "string",
                         "index" => "not_analyzed"
                     ],
-                    'created_at'           =>
+                    'created_at'          =>
                         [
                             'type'   => 'date',
                             'format' => 'yyyy-MM-dd HH:mm:ss',
                         ],
-                    'updated_at'           =>
+                    'updated_at'          =>
                         [
                             'type'   => 'date',
                             'format' => 'yyyy-MM-dd HH:mm:ss',
