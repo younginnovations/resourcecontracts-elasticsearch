@@ -44,7 +44,7 @@ class MetadataService extends Service
                 'supporting_contracts' => $metaData['supporting_contracts'],
                 'created_at'           => $metaData['created_at'],
                 'updated_at'           => $metaData['updated_at'],
-                'external_source'      => isset($metadata['external_source']) ? $metadata['external_source'] : ''
+                'external_source'      => isset($metaData['external_source']) ? $metaData['external_source'] : ''
             ];
             if ($document) {
                 $params['body']['doc'] = $data;

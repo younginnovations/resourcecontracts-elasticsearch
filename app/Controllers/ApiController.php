@@ -38,6 +38,7 @@ class ApiController extends BaseController
                 'updated_at'           => $this->request->request->get('updated_at'),
                 'total_pages'          => $this->request->request->get('total_pages'),
                 'supporting_contracts' => $this->request->request->get('supporting_contracts'),
+                'external_source'      => $this->request->request->get('external_source'),
             ];
 
             if ($response = $metadata->index($data)) {
@@ -108,7 +109,21 @@ class ApiController extends BaseController
         if ($response = $contract->deleteAnnotations($contractId['contract_id'])) {
             return $this->json($response);
         }
+
         return $this->json(['failed']);
+    }
+
+
+    public function deleteSources()
+    {
+
+        $contract = new DeleteContractService();
+
+        $externalSource = $this->request->request->all();
+        $response = $contract->deleteExternalSource($externalSource['source']);
+        return $this->json($response);
+
+
     }
 
 }

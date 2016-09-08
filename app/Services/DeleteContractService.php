@@ -19,10 +19,10 @@ class DeleteContractService extends Service
     public function deleteContract($request)
     {
         $id                      = $request['id'];
-        $response['metadata']    = $this->deleteMetadata($id);
-        $response['pdftext']     = $this->deletePdfText($id);
-        $response['annotations'] = $this->deleteAnnotations($id);
-        $response['master']      = $this->deleteMaster($id);
+        $response['metadata'][]    = $this->deleteMetadata($id);
+        $response['pdftext'][]     = $this->deletePdfText($id);
+        $response['annotations'][] = $this->deleteAnnotations($id);
+        $response['master'][]      = $this->deleteMaster($id);
 
         return $response;
     }
@@ -118,5 +118,42 @@ class DeleteContractService extends Service
 
             return "Master not found";
         }
+    }
+
+    public function deleteExternalSource($source)
+    {
+        try{
+            $response=[];
+
+            $params['index']= $this->index;
+            $params['type']="metadata";
+            $params['body']=[
+                "query"=>[
+                    "term"=>[
+                        "external_source"=>[
+                            "value"=>strtolower($source)
+                        ]
+                    ]
+                ]
+            ];
+
+            $results = $this->es->search($params);
+            $results = $results['hits']['hits'];
+            foreach($results as $result)
+            {
+                $data['id']=$result['_id'];
+                $resp = $this->deleteContract($data);
+                $response=array_merge($response,$resp);
+            }
+            logger()->info(sprintf("Contract deleted with source=%s ",$source), $response);
+            return $response;
+        }
+        catch(Exception $e)
+        {
+            logger()->error(sprintf("Contract cannot be deleted with source=%s ",$source), [$e->getMessage()]);
+
+            return "Master not found";
+        }
+
     }
 }
