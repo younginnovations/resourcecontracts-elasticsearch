@@ -114,6 +114,11 @@ class AnnotationsService extends Service
             $data .= ' '.$text;
         }
 
+        foreach ($annotations as $annotation) {
+            $text     = isset($annotation['category']) ? $annotation['category'] : "";
+            $data .= ' '.$text;
+        }
+
         return trim($data);
     }
 
