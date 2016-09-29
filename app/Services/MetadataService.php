@@ -477,6 +477,10 @@ class MetadataService extends Service
                                             [
                                                 'type' => 'string',
                                             ],
+                                        'disclosure_mode_text'     =>
+                                            [
+                                                'type' => 'string',
+                                            ],
                                         'date_retrieval'      =>
                                             [
                                                 'type'   => 'date',
