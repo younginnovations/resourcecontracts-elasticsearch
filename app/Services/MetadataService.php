@@ -57,14 +57,14 @@ class MetadataService extends Service
                 $response    = $this->es->update($params);
                 $uText       = $this->updateTextOCID($params['id'], $metadata->open_contracting_id);
                 $uAnnotation = $this->updateAnnotationOCID($params['id'], $metadata->open_contracting_id);
-                $master       = $this->insertIntoMaster($metaData['id'], $metadata);
+                $master      = $this->insertIntoMaster($metaData['id'], $metadata);
                 logger()->info("Metadata Index updated", array_merge($response, $master, $uText, $uAnnotation));
 
                 return array_merge($response, $master, $uText, $uAnnotation);
             }
             $params['body'] = $data;
             $response       = $this->es->index($params);
-            $master       = $this->insertIntoMaster($metaData['id'], $metadata);
+            $master         = $this->insertIntoMaster($metaData['id'], $metadata);
 
             logger()->info("Metadata Index created", $response);
 
@@ -239,7 +239,7 @@ class MetadataService extends Service
      */
     public function removeURL($metadata)
     {
-        $metadatas=$metadata;
+        $metadatas = $metadata;
         try {
             unset($metadatas->source_url, $metadatas->amla_url, $metadatas->file_url, $metadatas->word_file);
             $i = 0;
@@ -299,7 +299,7 @@ class MetadataService extends Service
                                     ],
                                 'properties'  =>
                                     [
-                                        'contract_name'       =>
+                                        'contract_name'        =>
                                             [
                                                 'type'     => 'string',
                                                 "analyzer" => "english",
@@ -310,23 +310,23 @@ class MetadataService extends Service
                                                     ]
                                                 ]
                                             ],
-                                        "open_contracting_id" => [
+                                        "open_contracting_id"  => [
                                             "type"  => "string",
                                             "index" => "not_analyzed"
                                         ],
-                                        'show_pdf_text'       =>
+                                        'show_pdf_text'        =>
                                             [
                                                 'type' => 'integer'
                                             ],
-                                        'contract_identifier' =>
+                                        'contract_identifier'  =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'language'            =>
+                                        'language'             =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'country'             =>
+                                        'country'              =>
                                             [
                                                 'properties' =>
                                                     [
@@ -347,11 +347,11 @@ class MetadataService extends Service
                                                             ],
                                                     ],
                                             ],
-                                        'resource'            =>
+                                        'resource'             =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'government_entity'   =>
+                                        'government_entity'    =>
                                             [
                                                 'properties' =>
                                                     [
@@ -365,7 +365,7 @@ class MetadataService extends Service
                                                             ]
                                                     ]
                                             ],
-                                        'type_of_contract'    =>
+                                        'type_of_contract'     =>
                                             [
                                                 'type'     => 'string',
                                                 "analyzer" => "english",
@@ -376,7 +376,7 @@ class MetadataService extends Service
                                                     ]
                                                 ]
                                             ],
-                                        'document_type'       =>
+                                        'document_type'        =>
                                             [
                                                 'type'     => 'string',
                                                 "analyzer" => "english",
@@ -387,20 +387,20 @@ class MetadataService extends Service
                                                     ]
                                                 ]
                                             ],
-                                        'signature_date'      =>
+                                        'signature_date'       =>
                                             [
                                                 'type'   => 'date',
                                                 'format' => 'dateOptionalTime',
                                             ],
-                                        'signature_year'      =>
+                                        'signature_year'       =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'translation_parent'  =>
+                                        'translation_parent'   =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'company'             =>
+                                        'company'              =>
                                             [
                                                 'properties' =>
                                                     [
@@ -447,15 +447,15 @@ class MetadataService extends Service
                                                             ],
                                                     ],
                                             ],
-                                        'project_title'       =>
+                                        'project_title'        =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'project_identifier'  =>
+                                        'project_identifier'   =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'concession'          =>
+                                        'concession'           =>
                                             [
                                                 'properties' =>
                                                     [
@@ -469,24 +469,32 @@ class MetadataService extends Service
                                                             ],
                                                     ],
                                             ],
-                                        'source_url'          =>
+                                        'source_url'           =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'disclosure_mode'     =>
+                                        'disclosure_mode'      =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'date_retrieval'      =>
+                                        'disclosure_mode_text' =>
+                                            [
+                                                'type' => 'string',
+                                            ],
+                                        'date_retrieval'       =>
                                             [
                                                 'type'   => 'date',
                                                 'format' => 'dateOptionalTime',
                                             ],
-                                        'category'            =>
+                                        'category'             =>
                                             [
                                                 'type' => 'string',
                                             ],
-                                        'translated_from'     =>
+                                        'is_contract_signed'   =>
+                                            [
+                                                'type' => 'string'
+                                            ],
+                                        'translated_from'      =>
                                             [
                                                 'properties' =>
                                                     [
