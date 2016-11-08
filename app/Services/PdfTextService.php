@@ -47,11 +47,9 @@ class PdfTextService extends Service
                 if ($document) {
                     $param['body']['doc'] = $doc;
                     $response[]           = $this->es->update($param);
-                    //logger()->info("Pdf Text document updated", $response);
                 } else {
                     $param['body'] = $doc;
                     $response[]    = $this->es->index($param);
-                    //logger()->info("Pdf Text document created", $response);
                 }
             }
 
