@@ -20,7 +20,9 @@ class MetadataService extends Service
 
     /**
      * Create document
+     *
      * @param array $metaData
+     *
      * @return array
      */
     public function index($metaData)
@@ -42,11 +44,11 @@ class MetadataService extends Service
                 'created_user_email'   => $createdBy->email,
                 'resource_raw'         => $metadata->resource,
                 'supporting_contracts' => $metaData['supporting_contracts'],
-                'created_at'           => date('Y-m-d', strtotime($metaData['created_at'])) . 'T' . date(
+                'created_at'           => date('Y-m-d', strtotime($metaData['created_at'])).'T'.date(
                         'H:i:s',
                         strtotime($metaData['created_at'])
                     ),
-                'updated_at'           => date('Y-m-d', strtotime($metaData['updated_at'])) . 'T' . date(
+                'updated_at'           => date('Y-m-d', strtotime($metaData['updated_at'])).'T'.date(
                         'H:i:s',
                         strtotime($metaData['updated_at'])
                     ),
@@ -125,7 +127,9 @@ class MetadataService extends Service
 
     /**
      * Delete document
+     *
      * @param $id
+     *
      * @return array
      */
     public function delete($id)
@@ -138,7 +142,9 @@ class MetadataService extends Service
 
     /**
      * Create document
+     *
      * @param array response
+     *
      * @return array
      */
     public function insertIntoMaster($contracId, $metadata)
@@ -155,13 +161,13 @@ class MetadataService extends Service
                 "metadata_string"      => $this->getMetadataString($this->removeURL($metadata)),
                 "pdf_text_string"      => [],
                 "annotations_category" => [],
-                "annotations_string"   => []
+                "annotations_string"   => [],
             ];
 
             if ($document) {
                 $params['body']['doc'] = [
                     "metadata"        => $this->filterMetadata($metadata),
-                    "metadata_string" => $this->getMetadataString($this->removeURL($metadata))
+                    "metadata_string" => $this->getMetadataString($this->removeURL($metadata)),
                 ];
 
                 $response = $this->es->update($params);
@@ -200,6 +206,7 @@ class MetadataService extends Service
         $data['document_type']       = $metadata->document_type;
         $data['resource_raw']        = $data['resource'];
         $data['show_pdf_text']       = $metadata->show_pdf_text;
+        $data['project_name']        = $metadata->project_title;
         $data['company_name']        = [];
         $data['corporate_grouping']  = [];
 
@@ -224,7 +231,7 @@ class MetadataService extends Service
                 $data = $this->getMetadataString($value, $data);
             } else {
                 if ($value != '') {
-                    $data .= ' ' . $value;
+                    $data .= ' '.$value;
                 }
             }
         }
@@ -234,7 +241,9 @@ class MetadataService extends Service
 
     /**
      * Remove url from metadata
+     *
      * @param $metadata
+     *
      * @return array $metadata
      */
     public function removeURL($metadata)
@@ -245,7 +254,7 @@ class MetadataService extends Service
             $i = 0;
             foreach ($metadatas->company as $company) {
                 unset($metadatas->company[$i]->open_corporate_id);
-                $i ++;
+                $i++;
             }
             logger()->info("URL removed metadata", (array) $metadatas);
 
@@ -306,17 +315,17 @@ class MetadataService extends Service
                                                 "fields"   => [
                                                     "raw" => [
                                                         "type"  => "string",
-                                                        "index" => "not_analyzed"
-                                                    ]
-                                                ]
+                                                        "index" => "not_analyzed",
+                                                    ],
+                                                ],
                                             ],
                                         "open_contracting_id"  => [
                                             "type"  => "string",
-                                            "index" => "not_analyzed"
+                                            "index" => "not_analyzed",
                                         ],
                                         'show_pdf_text'        =>
                                             [
-                                                'type' => 'integer'
+                                                'type' => 'integer',
                                             ],
                                         'contract_identifier'  =>
                                             [
@@ -341,9 +350,9 @@ class MetadataService extends Service
                                                                 "fields"   => [
                                                                     "raw" => [
                                                                         "type"  => "string",
-                                                                        "index" => "not_analyzed"
-                                                                    ]
-                                                                ]
+                                                                        "index" => "not_analyzed",
+                                                                    ],
+                                                                ],
                                                             ],
                                                     ],
                                             ],
@@ -357,13 +366,13 @@ class MetadataService extends Service
                                                     [
                                                         'entity'     =>
                                                             [
-                                                                'type' => 'string'
+                                                                'type' => 'string',
                                                             ],
                                                         'identifier' =>
                                                             [
-                                                                'type' => 'string'
-                                                            ]
-                                                    ]
+                                                                'type' => 'string',
+                                                            ],
+                                                    ],
                                             ],
                                         'type_of_contract'     =>
                                             [
@@ -372,9 +381,9 @@ class MetadataService extends Service
                                                 "fields"   => [
                                                     "raw" => [
                                                         "type"  => "string",
-                                                        "index" => "not_analyzed"
-                                                    ]
-                                                ]
+                                                        "index" => "not_analyzed",
+                                                    ],
+                                                ],
                                             ],
                                         'document_type'        =>
                                             [
@@ -383,9 +392,9 @@ class MetadataService extends Service
                                                 "fields"   => [
                                                     "raw" => [
                                                         "type"  => "string",
-                                                        "index" => "not_analyzed"
-                                                    ]
-                                                ]
+                                                        "index" => "not_analyzed",
+                                                    ],
+                                                ],
                                             ],
                                         'signature_date'       =>
                                             [
@@ -492,7 +501,7 @@ class MetadataService extends Service
                                             ],
                                         'is_contract_signed'   =>
                                             [
-                                                'type' => 'string'
+                                                'type' => 'string',
                                             ],
                                         'translated_from'      =>
                                             [
@@ -581,10 +590,10 @@ class MetadataService extends Service
 
             $params['body'][$this->type] = $mapping;
 
-            $meadata = $this->es->indices()->putMapping($params);;
-            logger()->info("Metadata Mapping done", $meadata);
+            $metadata = $this->es->indices()->putMapping($params);
+            logger()->info("Metadata Mapping done", $metadata);
 
-            return $meadata;
+            return $metadata;
         } catch (\Exception $e) {
             logger()->error("Metadata Mapping Error", (array) $e->getMessage());
 
@@ -611,48 +620,48 @@ class MetadataService extends Service
                                 "fields"   => [
                                     "raw" => [
                                         "type"  => "string",
-                                        "index" => "not_analyzed"
-                                    ]
-                                ]
+                                        "index" => "not_analyzed",
+                                    ],
+                                ],
 
                             ],
                             "open_contracting_id" => [
                                 "type"  => "string",
-                                "index" => "not_analyzed"
+                                "index" => "not_analyzed",
                             ],
                             "country_name"        => [
                                 "type"  => "string",
-                                "index" => "not_analyzed"
+                                "index" => "not_analyzed",
                             ],
                             "country_code"        => [
-                                "type" => "string"
+                                "type" => "string",
                             ],
                             "signature_year"      => [
-                                "type" => "string"
+                                "type" => "string",
                             ],
                             "signature_date"      => [
                                 'type'   => 'date',
                                 'format' => 'dateOptionalTime',
                             ],
                             "resource"            => [
-                                "type" => "string"
+                                "type" => "string",
                             ],
                             "resource_raw"        => [
                                 "type"  => "string",
-                                'index' => 'not_analyzed'
+                                'index' => 'not_analyzed',
                             ],
                             "file_size"           => [
                                 "type" => "integer",
                             ],
                             "language"            => [
-                                "type" => "string"
+                                "type" => "string",
                             ],
                             "category"            => [
-                                "type" => "string"
+                                "type" => "string",
                             ],
                             "contract_type"       => [
                                 "type"  => "string",
-                                "index" => "not_analyzed"
+                                "index" => "not_analyzed",
                             ],
                             'document_type'       =>
                                 [
@@ -661,34 +670,45 @@ class MetadataService extends Service
                                     "fields"   => [
                                         "raw" => [
                                             "type"  => "string",
-                                            "index" => "not_analyzed"
-                                        ]
-                                    ]
+                                            "index" => "not_analyzed",
+                                        ],
+                                    ],
+                                ],
+                            'project_name'        =>
+                                [
+                                    'type'     => 'string',
+                                    "analyzer" => "english",
+                                    "fields"   => [
+                                        "raw" => [
+                                            "type"  => "string",
+                                            "index" => "not_analyzed",
+                                        ],
+                                    ],
                                 ],
                             "company_name"        => [
                                 "type"  => "string",
-                                "index" => "not_analyzed"
+                                "index" => "not_analyzed",
                             ],
                             "corporate_grouping"  => [
                                 "type"  => "string",
-                                "index" => "not_analyzed"
-                            ]
-                        ]
+                                "index" => "not_analyzed",
+                            ],
+                        ],
                     ],
                     "annotations_category" => [
                         "type"  => "string",
-                        "index" => "not_analyzed"
+                        "index" => "not_analyzed",
                     ],
                     "metadata_string"      => [
-                        "type" => "string"
+                        "type" => "string",
                     ],
                     "pdf_text_string"      => [
-                        "type" => "string"
+                        "type" => "string",
                     ],
                     "annotations_string"   => [
-                        "type" => "string"
-                    ]
-                ]
+                        "type" => "string",
+                    ],
+                ],
             ];
 
             $params['body']["master"] = $mapping;
@@ -716,7 +736,7 @@ class MetadataService extends Service
                 "properties" => [
                     "open_contracting_id" => [
                         "type"  => "string",
-                        "index" => "not_analyzed"
+                        "index" => "not_analyzed",
                     ],
                     'category'            =>
                         [
@@ -725,11 +745,11 @@ class MetadataService extends Service
                             "fields"   => [
                                 "raw" => [
                                     "type"  => "string",
-                                    "index" => "not_analyzed"
-                                ]
-                            ]
+                                    "index" => "not_analyzed",
+                                ],
+                            ],
                         ],
-                ]
+                ],
             ];
 
             $params['body']["annotations"] = $mapping;
@@ -757,9 +777,9 @@ class MetadataService extends Service
                 "properties" => [
                     "open_contracting_id" => [
                         "type"  => "string",
-                        "index" => "not_analyzed"
+                        "index" => "not_analyzed",
                     ],
-                ]
+                ],
             ];
 
             $params['body']["pdf_text"] = $mapping;
