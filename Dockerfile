@@ -13,7 +13,9 @@ RUN apt-get update && apt-get install -y \
     php5-readline \
  && rm -rf /var/lib/apt/lists/*
 
-ADD conf/apache_default /etc/apache2/sites-available/000-default.conf
+COPY conf/rc-index.conf /etc/apache2/sites-available/rc-index.conf
+RUN ln -s /etc/apache2/sites-available/rc-index.conf /etc/apache2/sites-enabled/rc-index.conf \
+ && rm -f /etc/apache2/sites-enabled/000-default.conf
 
 RUN a2enmod rewrite \
  && a2enmod php5 \
