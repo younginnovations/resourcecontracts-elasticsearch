@@ -16,6 +16,7 @@ class MetadataService extends Service
     {
         parent::__construct();
         $this->checkIndex();
+
     }
 
     /**
@@ -26,21 +27,23 @@ class MetadataService extends Service
     public function index($metaData)
     {
         try {
-            $params       = $this->getIndexType();
-            $params['id'] = $metaData['id'];
-            $document     = $this->es->exists($params);
-            $metadata     = json_decode($metaData['metadata']);
-            $createdBy    = json_decode($metaData['created_by']);
-            $updatedBy    = json_decode($metaData['updated_by']);
-            $data         = [
+            $params        = $this->getIndexType();
+            $params['id']  = $metaData['id'];
+            $document      = $this->es->exists($params);
+            $metadata      = json_decode($metaData['metadata']);
+            $metadatatrans = json_decode($metaData['metadata_trans']);
+            $createdBy     = json_decode($metaData['created_by']);
+            $updatedBy     = json_decode($metaData['updated_by']);
+            $data          = [
                 'contract_id'          => $metaData['id'],
-                'metadata'             => $metadata,
+                'en'                   => $metadata->en,
+                'fr'                   => $metadata->fr,
+                'ar'                   => $metadata->ar,
                 'updated_user_name'    => $updatedBy->name,
                 'total_pages'          => $metaData['total_pages'],
                 'updated_user_email'   => $updatedBy->email,
                 'created_user_name'    => $createdBy->name,
                 'created_user_email'   => $createdBy->email,
-                'resource_raw'         => $metadata->resource,
                 'supporting_contracts' => $metaData['supporting_contracts'],
                 'created_at'           => date('Y-m-d', strtotime($metaData['created_at'])) . 'T' . date(
                         'H:i:s',
@@ -55,8 +58,8 @@ class MetadataService extends Service
                 $params['body']['doc'] = $data;
 
                 $response    = $this->es->update($params);
-                $uText       = $this->updateTextOCID($params['id'], $metadata->open_contracting_id);
-                $uAnnotation = $this->updateAnnotationOCID($params['id'], $metadata->open_contracting_id);
+                $uText       = $this->updateTextOCID($params['id'], $metadata->en->open_contracting_id);
+                $uAnnotation = $this->updateAnnotationOCID($params['id'], $metadata->en->open_contracting_id);
                 $master      = $this->insertIntoMaster($metaData['id'], $metadata);
                 logger()->info("Metadata Index updated", array_merge($response, $master, $uText, $uAnnotation));
 
@@ -151,8 +154,14 @@ class MetadataService extends Service
             $params['id']    = $contracId;
             $document        = $this->es->exists($params);
             $body            = [
-                "metadata"             => $this->filterMetadata($metadata),
-                "metadata_string"      => $this->getMetadataString($this->removeURL($metadata)),
+                "en"                   => $this->filterMetadata($metadata->en),
+                "fr"                   => $this->filterMetadata($metadata->fr),
+                "ar"                   => $this->filterMetadata($metadata->ar),
+                "metadata_string"      => [
+                    "en" => $this->getMetadataString($this->removeURL($metadata->en)),
+                    "fr" => $this->getMetadataString($this->removeURL($metadata->fr)),
+                    "ar" => $this->getMetadataString($this->removeURL($metadata->ar))
+                ],
                 "pdf_text_string"      => [],
                 "annotations_category" => [],
                 "annotations_string"   => []
@@ -160,8 +169,14 @@ class MetadataService extends Service
 
             if ($document) {
                 $params['body']['doc'] = [
-                    "metadata"        => $this->filterMetadata($metadata),
-                    "metadata_string" => $this->getMetadataString($this->removeURL($metadata))
+                    "en"              => $this->filterMetadata($metadata->en),
+                    "fr"              => $this->filterMetadata($metadata->fr),
+                    "ar"              => $this->filterMetadata($metadata->ar),
+                    "metadata_string" => [
+                        "en" => $this->getMetadataString($this->removeURL($metadata->en)),
+                        "fr" => $this->getMetadataString($this->removeURL($metadata->fr)),
+                        "ar" => $this->getMetadataString($this->removeURL($metadata->ar))
+                    ],
                 ];
 
                 $response = $this->es->update($params);
@@ -184,6 +199,7 @@ class MetadataService extends Service
 
     public function filterMetadata($metadata)
     {
+        logger()->info('sdfsdf', (array) $metadata);
 
         $data                        = [];
         $data['contract_name']       = $metadata->contract_name;
@@ -271,7 +287,7 @@ class MetadataService extends Service
             $master      = $this->createMasterMapping();
             $annotations = $this->createAnnotationsMapping();
             $pdftext     = $this->createPdfTextMapping();
-
+            logger()->info("master mapping");
             return true;
         }
 
@@ -289,294 +305,83 @@ class MetadataService extends Service
             $this->es->indices()->refresh($params);
             $params['type'] = $this->type;
             $mapping        = [
-                'properties' =>
-                    [
-                        'metadata'             =>
-                            [
-                                'contract_id' =>
-                                    [
-                                        'type' => 'integer',
-                                    ],
-                                'properties'  =>
-                                    [
-                                        'contract_name'        =>
-                                            [
-                                                'type'     => 'string',
-                                                "analyzer" => "english",
-                                                "fields"   => [
-                                                    "raw" => [
-                                                        "type"  => "string",
-                                                        "index" => "not_analyzed"
-                                                    ]
-                                                ]
-                                            ],
-                                        "open_contracting_id"  => [
-                                            "type"  => "string",
-                                            "index" => "not_analyzed"
-                                        ],
-                                        'show_pdf_text'        =>
-                                            [
-                                                'type' => 'integer'
-                                            ],
-                                        'contract_identifier'  =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'language'             =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'country'              =>
-                                            [
-                                                'properties' =>
-                                                    [
-                                                        'code' =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                        'name' =>
-                                                            [
-                                                                'type'     => 'string',
-                                                                "analyzer" => "english",
-                                                                "fields"   => [
-                                                                    "raw" => [
-                                                                        "type"  => "string",
-                                                                        "index" => "not_analyzed"
-                                                                    ]
-                                                                ]
-                                                            ],
-                                                    ],
-                                            ],
-                                        'resource'             =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'government_entity'    =>
-                                            [
-                                                'properties' =>
-                                                    [
-                                                        'entity'     =>
-                                                            [
-                                                                'type' => 'string'
-                                                            ],
-                                                        'identifier' =>
-                                                            [
-                                                                'type' => 'string'
-                                                            ]
-                                                    ]
-                                            ],
-                                        'type_of_contract'     =>
-                                            [
-                                                'type'     => 'string',
-                                                "analyzer" => "english",
-                                                "fields"   => [
-                                                    "raw" => [
-                                                        "type"  => "string",
-                                                        "index" => "not_analyzed"
-                                                    ]
-                                                ]
-                                            ],
-                                        'document_type'        =>
-                                            [
-                                                'type'     => 'string',
-                                                "analyzer" => "english",
-                                                "fields"   => [
-                                                    "raw" => [
-                                                        "type"  => "string",
-                                                        "index" => "not_analyzed"
-                                                    ]
-                                                ]
-                                            ],
-                                        'signature_date'       =>
-                                            [
-                                                'type'   => 'date',
-                                                'format' => 'dateOptionalTime',
-                                            ],
-                                        'signature_year'       =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'translation_parent'   =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'company'              =>
-                                            [
-                                                'properties' =>
-                                                    [
-                                                        'name'                          =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                        'participation_share'           =>
-                                                            [
-                                                                'type' => 'double',
-                                                            ],
-                                                        'jurisdiction_of_incorporation' =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                        'registration_agency'           =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                        'company_founding_date'         =>
-                                                            [
-                                                                'type'   => 'date',
-                                                                'format' => 'dateOptionalTime',
-                                                            ],
-                                                        'company_address'               =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                        'company_number'                =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                        'parent_company'                =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                        'open_corporate_id'             =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                        'operator'                      =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                    ],
-                                            ],
-                                        'project_title'        =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'project_identifier'   =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'concession'           =>
-                                            [
-                                                'properties' =>
-                                                    [
-                                                        'license_name'       =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                        'license_identifier' =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                    ],
-                                            ],
-                                        'source_url'           =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'disclosure_mode'      =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'disclosure_mode_text' =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'date_retrieval'       =>
-                                            [
-                                                'type'   => 'date',
-                                                'format' => 'dateOptionalTime',
-                                            ],
-                                        'category'             =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                        'is_contract_signed'   =>
-                                            [
-                                                'type' => 'string'
-                                            ],
-                                        'translated_from'      =>
-                                            [
-                                                'properties' =>
-                                                    [
-                                                        'id'            =>
-                                                            [
-                                                                'type' => 'integer',
-                                                            ],
-                                                        'contract_name' =>
-                                                            [
-                                                                'type' => 'string',
-                                                            ],
-                                                    ],
-                                            ],
-                                    ],
+                'properties' => [
 
-                            ],
-                        'file_size'            =>
-                            [
-                                'type' => 'long',
-                            ],
-                        'amla_url'             =>
-                            [
-                                'type' => 'string',
-                            ],
-                        'file_url'             =>
-                            [
-                                'type' => 'string',
-                            ],
-                        'word_file'            =>
-                            [
-                                'type' => 'string',
-                            ],
-                        'updated_user_name'    =>
-                            [
-                                'type' => 'string',
-                            ],
-                        'total_pages'          =>
-                            [
-                                'type' => 'integer',
-                            ],
-                        'updated_user_email'   =>
-                            [
-                                'type' => 'string',
-                            ],
-                        'created_user_name'    =>
-                            [
-                                'type' => 'string',
-                            ],
-                        'created_user_email'   =>
-                            [
-                                'type' => 'string',
-                            ],
-                        'supporting_contracts' =>
-                            [
-                                'properties' =>
-                                    [
-                                        'id'            =>
-                                            [
-                                                'type' => 'integer',
-                                            ],
-                                        'contract_name' =>
-                                            [
-                                                'type' => 'string',
-                                            ],
-                                    ],
-                            ],
-                        'created_at'           =>
-                            [
-                                'type'   => 'date',
-                                'format' => 'dateOptionalTime',
-                            ],
-                        'updated_at'           =>
-                            [
-                                'type'   => 'date',
-                                'format' => 'dateOptionalTime',
-                            ],
-                        'resource_raw'         =>
-                            [
-                                'type'  => 'string',
-                                'index' => 'not_analyzed',
-                            ],
+                    'contract_id'          =>
+                        [
+                            'type' => 'integer',
+                        ],
+                    "en"                   => [
+                        "properties" => $this->metadataMapping()
                     ],
+                    "ar"                   => [
+                        "properties" => $this->metadataMapping()
+                    ],
+                    "fr"                   => [
+                        "properties" => $this->metadataMapping()
+                    ],
+                    'file_size'            =>
+                        [
+                            'type' => 'long',
+                        ],
+                    'amla_url'             =>
+                        [
+                            'type' => 'string',
+                        ],
+                    'file_url'             =>
+                        [
+                            'type' => 'string',
+                        ],
+                    'word_file'            =>
+                        [
+                            'type' => 'string',
+                        ],
+                    'updated_user_name'    =>
+                        [
+                            'type' => 'string',
+                        ],
+                    'total_pages'          =>
+                        [
+                            'type' => 'integer',
+                        ],
+                    'updated_user_email'   =>
+                        [
+                            'type' => 'string',
+                        ],
+                    'created_user_name'    =>
+                        [
+                            'type' => 'string',
+                        ],
+                    'created_user_email'   =>
+                        [
+                            'type' => 'string',
+                        ],
+                    'supporting_contracts' =>
+                        [
+                            'properties' =>
+                                [
+                                    'id'            =>
+                                        [
+                                            'type' => 'integer',
+                                        ],
+                                    'contract_name' =>
+                                        [
+                                            'type' => 'string',
+                                        ],
+                                ],
+                        ],
+                    'created_at'           =>
+                        [
+                            'type'   => 'date',
+                            'format' => 'dateOptionalTime',
+                        ],
+                    'updated_at'           =>
+                        [
+                            'type'   => 'date',
+                            'format' => 'dateOptionalTime',
+                        ],
+                ]
+
             ];
 
             $params['body'][$this->type] = $mapping;
@@ -598,89 +403,31 @@ class MetadataService extends Service
     private function createMasterMapping()
     {
         try {
+
             $params['index'] = $this->index;
             $this->es->indices()->refresh($params);
             $params['type'] = "master";
             $mapping        = [
                 "properties" => [
-                    "metadata"             => [
-                        "properties" => [
-                            "contract_name"       => [
-                                "type"     => "string",
-                                "analyzer" => "english",
-                                "fields"   => [
-                                    "raw" => [
-                                        "type"  => "string",
-                                        "index" => "not_analyzed"
-                                    ]
-                                ]
-
-                            ],
-                            "open_contracting_id" => [
-                                "type"  => "string",
-                                "index" => "not_analyzed"
-                            ],
-                            "country_name"        => [
-                                "type"  => "string",
-                                "index" => "not_analyzed"
-                            ],
-                            "country_code"        => [
-                                "type" => "string"
-                            ],
-                            "signature_year"      => [
-                                "type" => "string"
-                            ],
-                            "signature_date"      => [
-                                'type'   => 'date',
-                                'format' => 'dateOptionalTime',
-                            ],
-                            "resource"            => [
-                                "type" => "string"
-                            ],
-                            "resource_raw"        => [
-                                "type"  => "string",
-                                'index' => 'not_analyzed'
-                            ],
-                            "file_size"           => [
-                                "type" => "integer",
-                            ],
-                            "language"            => [
-                                "type" => "string"
-                            ],
-                            "category"            => [
-                                "type" => "string"
-                            ],
-                            "contract_type"       => [
-                                "type"  => "string",
-                                "index" => "not_analyzed"
-                            ],
-                            'document_type'       =>
-                                [
-                                    'type'     => 'string',
-                                    "analyzer" => "english",
-                                    "fields"   => [
-                                        "raw" => [
-                                            "type"  => "string",
-                                            "index" => "not_analyzed"
-                                        ]
-                                    ]
-                                ],
-                            "company_name"        => [
-                                "type"  => "string",
-                                "index" => "not_analyzed"
-                            ],
-                            "corporate_grouping"  => [
-                                "type"  => "string",
-                                "index" => "not_analyzed"
-                            ]
-                        ]
-                    ],
+                    "en"                   => $this->getMasterMapping(),
+                    "fr"                   => $this->getMasterMapping(),
+                    "ar"                   => $this->getMasterMapping(),
                     "annotations_category" => [
                         "type"  => "string",
                         "index" => "not_analyzed"
                     ],
                     "metadata_string"      => [
-                        "type" => "string"
+                        "properties"=>[
+                            "en"=>[
+                                "type" => "string"
+                            ],
+                            "fr"=>[
+                                "type"=>"string"
+                            ],
+                            "ar"=>[
+                                "type"=>"string"
+                            ]
+                        ]
                     ],
                     "pdf_text_string"      => [
                         "type" => "string"
@@ -772,6 +519,311 @@ class MetadataService extends Service
 
             return [$e->getMessage()];
         }
+    }
+
+    private function metadataMapping()
+    {
+        return
+            [
+                'contract_name'        =>
+                    [
+                        'type'     => 'string',
+                        "analyzer" => "english",
+                        "fields"   => [
+                            "raw" => [
+                                "type"  => "string",
+                                "index" => "not_analyzed"
+                            ]
+                        ]
+                    ],
+                "open_contracting_id"  => [
+                    "type"  => "string",
+                    "index" => "not_analyzed"
+                ],
+                'show_pdf_text'        =>
+                    [
+                        'type' => 'integer'
+                    ],
+                'contract_identifier'  =>
+                    [
+                        'type' => 'string',
+                    ],
+                'language'             =>
+                    [
+                        'type' => 'string',
+                    ],
+                'country'              =>
+                    [
+                        'properties' =>
+                            [
+                                'code' =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                                'name' =>
+                                    [
+                                        'type'     => 'string',
+                                        "analyzer" => "english",
+                                        "fields"   => [
+                                            "raw" => [
+                                                "type"  => "string",
+                                                "index" => "not_analyzed"
+                                            ]
+                                        ]
+                                    ],
+                            ],
+                    ],
+                'resource'             =>
+                    [
+                        'type'     => 'string',
+                        "analyzer" => "english",
+                        "fields"   => [
+                            "raw" => [
+                                "type"  => "string",
+                                "index" => "not_analyzed"
+                            ]
+                        ]
+                    ],
+                'government_entity'    =>
+                    [
+                        'properties' =>
+                            [
+                                'entity'     =>
+                                    [
+                                        'type' => 'string'
+                                    ],
+                                'identifier' =>
+                                    [
+                                        'type' => 'string'
+                                    ]
+                            ]
+                    ],
+                'type_of_contract'     =>
+                    [
+                        'type'     => 'string',
+                        "analyzer" => "english",
+                        "fields"   => [
+                            "raw" => [
+                                "type"  => "string",
+                                "index" => "not_analyzed"
+                            ]
+                        ]
+                    ],
+                'document_type'        =>
+                    [
+                        'type'     => 'string',
+                        "analyzer" => "english",
+                        "fields"   => [
+                            "raw" => [
+                                "type"  => "string",
+                                "index" => "not_analyzed"
+                            ]
+                        ]
+                    ],
+                'signature_date'       =>
+                    [
+                        'type'   => 'date',
+                        'format' => 'dateOptionalTime',
+                    ],
+                'signature_year'       =>
+                    [
+                        'type' => 'string',
+                    ],
+                'translation_parent'   =>
+                    [
+                        'type' => 'string',
+                    ],
+                'company'              =>
+                    [
+                        'properties' =>
+                            [
+                                'name'                          =>
+                                    [
+                                        'type' => 'string',
+                                        "fields"   => [
+                                            "raw" => [
+                                                "type"  => "string",
+                                                "index" => "not_analyzed"
+                                            ]
+                                        ]
+                                    ],
+                                'participation_share'           =>
+                                    [
+                                        'type' => 'double',
+                                    ],
+                                'jurisdiction_of_incorporation' =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                                'registration_agency'           =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                                'company_founding_date'         =>
+                                    [
+                                        'type'   => 'date',
+                                        'format' => 'dateOptionalTime',
+                                    ],
+                                'company_address'               =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                                'company_number'                =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                                'parent_company'                =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                                'open_corporate_id'             =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                                'operator'                      =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                            ],
+                    ],
+                'project_title'        =>
+                    [
+                        'type' => 'string',
+                    ],
+                'project_identifier'   =>
+                    [
+                        'type' => 'string',
+                    ],
+                'concession'           =>
+                    [
+                        'properties' =>
+                            [
+                                'license_name'       =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                                'license_identifier' =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                            ],
+                    ],
+                'source_url'           =>
+                    [
+                        'type' => 'string',
+                    ],
+                'disclosure_mode'      =>
+                    [
+                        'type' => 'string',
+                    ],
+                'disclosure_mode_text' =>
+                    [
+                        'type' => 'string',
+                    ],
+                'date_retrieval'       =>
+                    [
+                        'type'   => 'date',
+                        'format' => 'dateOptionalTime',
+                    ],
+                'category'             =>
+                    [
+                        'type' => 'string',
+                    ],
+                'is_contract_signed'   =>
+                    [
+                        'type' => 'string'
+                    ],
+                'translated_from'      =>
+                    [
+                        'properties' =>
+                            [
+                                'id'            =>
+                                    [
+                                        'type' => 'integer',
+                                    ],
+                                'contract_name' =>
+                                    [
+                                        'type' => 'string',
+                                    ],
+                            ],
+                    ],
+            ];
+    }
+
+    public function getMasterMapping()
+    {
+        return [
+            "properties" => [
+                "contract_name"       => [
+                    "type"     => "string",
+                    "analyzer" => "english",
+                    "fields"   => [
+                        "raw" => [
+                            "type"  => "string",
+                            "index" => "not_analyzed"
+                        ]
+                    ]
+
+                ],
+                "open_contracting_id" => [
+                    "type"  => "string",
+                    "index" => "not_analyzed"
+                ],
+                "country_name"        => [
+                    "type"  => "string",
+                    "index" => "not_analyzed"
+                ],
+                "country_code"        => [
+                    "type" => "string"
+                ],
+                "signature_year"      => [
+                    "type" => "string"
+                ],
+                "signature_date"      => [
+                    'type'   => 'date',
+                    'format' => 'dateOptionalTime',
+                ],
+                "resource"            => [
+                    "type" => "string"
+                ],
+                "resource_raw"        => [
+                    "type"  => "string",
+                    'index' => 'not_analyzed'
+                ],
+                "file_size"           => [
+                    "type" => "integer",
+                ],
+                "language"            => [
+                    "type" => "string"
+                ],
+                "category"            => [
+                    "type" => "string"
+                ],
+                "contract_type"       => [
+                    "type"  => "string",
+                    "index" => "not_analyzed"
+                ],
+                'document_type'       =>
+                    [
+                        'type'     => 'string',
+                        "analyzer" => "english",
+                        "fields"   => [
+                            "raw" => [
+                                "type"  => "string",
+                                "index" => "not_analyzed"
+                            ]
+                        ]
+                    ],
+                "company_name"        => [
+                    "type"  => "string",
+                    "index" => "not_analyzed"
+                ],
+                "corporate_grouping"  => [
+                    "type"  => "string",
+                    "index" => "not_analyzed"
+                ]
+            ]
+        ];
     }
 
 }

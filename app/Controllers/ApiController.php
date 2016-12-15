@@ -32,6 +32,7 @@ class ApiController extends BaseController
             $data = [
                 'id'                   => $this->request->request->get('id'),
                 'metadata'             => $this->request->request->get('metadata'),
+                'metadata_trans'       => $this->request->request->get('metadata_trans'),
                 'created_by'           => $this->request->request->get('created_by'),
                 'updated_by'           => $this->request->request->get('updated_by'),
                 'created_at'           => $this->request->request->get('created_at'),
