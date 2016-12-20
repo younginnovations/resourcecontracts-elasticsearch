@@ -12,7 +12,7 @@ use App\Services\PdfTextService;
 class ApiController extends BaseController
 {
     /**
-     * Show Home page
+     * Shows Home page
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function index()
@@ -21,7 +21,7 @@ class ApiController extends BaseController
     }
 
     /**
-     * index metadata
+     * Indexes metadata
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function metadata()
@@ -54,7 +54,7 @@ class ApiController extends BaseController
     }
 
     /**
-     * Index Pdf Text
+     * Indexes Pdf Text
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function pdfText()
@@ -70,7 +70,7 @@ class ApiController extends BaseController
 
 
     /**
-     * Index Annotation
+     * Indexes Annotation
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function annotation()
@@ -86,7 +86,7 @@ class ApiController extends BaseController
 
 
     /**
-     * Delete Contract
+     * Deletes Contract
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteContract()
@@ -100,7 +100,7 @@ class ApiController extends BaseController
     }
 
     /**
-     * Delete contract annotations
+     * Deletes contract annotations
      */
     public function deleteContractAnnotation()
     {
@@ -114,7 +114,7 @@ class ApiController extends BaseController
     }
 
     /**
-     * Delete contract's document from metadata and master
+     * Deletes contract's document from metadata and master
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteContractMetadata()
@@ -129,7 +129,7 @@ class ApiController extends BaseController
     }
 
     /**
-     * Delete text document from pdf_text
+     * Deletes text document from pdf_text
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteContractText()
@@ -142,5 +142,4 @@ class ApiController extends BaseController
 
         return $this->json(['failed']);
     }
-
 }
