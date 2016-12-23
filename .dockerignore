@@ -16,10 +16,10 @@
 !.elasticbeanstalk/*.global.yml
 
 # App runtime folders
-/vendor
-/node_modules
-/public/uploads
-/public/data
-/storage/debugbar
-/log
+vendor
+node_modules
+public/uploads
+public/data
+storage/debugbar
+log
 .env
