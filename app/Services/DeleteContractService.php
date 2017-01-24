@@ -54,7 +54,7 @@ class DeleteContractService extends Service
 
             return $delete;
         } catch (Missing404Exception $e) {
-            logger()->error("Metadata not found", [$e->getMessage()]);
+            logger()->warning("Metadata not found", [$e->getMessage()]);
 
             return "Metadata not found";
         }
@@ -79,7 +79,7 @@ class DeleteContractService extends Service
 
             return $delete;
         } catch (Missing404Exception $e) {
-            logger()->error("Pdf text not found", [$e->getMessage()]);
+            logger()->warning("Pdf text not found", [$e->getMessage()]);
 
             return "Text not found";
         }
@@ -104,7 +104,7 @@ class DeleteContractService extends Service
 
             return $delete;
         } catch (Missing404Exception $e) {
-            logger()->error("Annotations not found", [$e->getMessage()]);
+            logger()->warning("Annotations not found", [$e->getMessage()]);
             return "Annotations not found";
         }
     }
@@ -125,7 +125,7 @@ class DeleteContractService extends Service
 
             return $delete;
         } catch (Missing404Exception $e) {
-            logger()->error("Master Not found", [$e->getMessage()]);
+            logger()->warning("Master Not found", [$e->getMessage()]);
 
             return "Master not found";
         }
@@ -151,7 +151,7 @@ class DeleteContractService extends Service
 
             return $response;
         } catch (Missing404Exception $e) {
-            logger()->error("Master Not found", [$e->getMessage()]);
+            logger()->warning("Master Not found", [$e->getMessage()]);
 
             return "Master not found";
         }
@@ -178,7 +178,7 @@ class DeleteContractService extends Service
 
             return $response;
         } catch (Missing404Exception $e) {
-            logger()->error("Master Not found", [$e->getMessage()]);
+            logger()->warning("Master Not found", [$e->getMessage()]);
 
             return "Master not found";
         }
