@@ -22,10 +22,7 @@ class ApiController extends BaseController
 
     /**
      * Indexes metadata
-<<<<<<< Updated upstream
-=======
      *
->>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function metadata()
@@ -58,10 +55,7 @@ class ApiController extends BaseController
 
     /**
      * Indexes Pdf Text
-<<<<<<< Updated upstream
-=======
      *
->>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function pdfText()
@@ -82,10 +76,7 @@ class ApiController extends BaseController
 
     /**
      * Indexes Annotation
-<<<<<<< Updated upstream
-=======
      *
->>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function annotation()
@@ -105,10 +96,7 @@ class ApiController extends BaseController
 
     /**
      * Deletes Contract
-<<<<<<< Updated upstream
-=======
      *
->>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteContract()
@@ -127,13 +115,9 @@ class ApiController extends BaseController
     }
 
     /**
-<<<<<<< Updated upstream
-     * Deletes contract annotations
-=======
      * Deletes contract's annotations
      *
      * @return \Symfony\Component\HttpFoundation\Response
->>>>>>> Stashed changes
      */
     public function deleteContractAnnotation()
     {
@@ -153,10 +137,7 @@ class ApiController extends BaseController
 
     /**
      * Deletes contract's document from metadata and master
-<<<<<<< Updated upstream
-=======
      *
->>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteContractMetadata()
@@ -178,10 +159,7 @@ class ApiController extends BaseController
 
     /**
      * Deletes text document from pdf_text
-<<<<<<< Updated upstream
-=======
      *
->>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteContractText()
@@ -190,9 +168,6 @@ class ApiController extends BaseController
             $contract   = new DeleteContractService();
             $contractId = $this->request->request->all();
 
-<<<<<<< Updated upstream
-        return $this->json(['failed']);
-=======
             if ($response = $contract->deletePdfText($contractId['contract_id'])) {
                 return $this->json(['result' => $response]);
             }
@@ -201,6 +176,5 @@ class ApiController extends BaseController
         } catch (\Exception $e) {
             return $this->json(['result' => $e->getMessage()]);
         }
->>>>>>> Stashed changes
     }
 }
