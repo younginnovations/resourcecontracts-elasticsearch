@@ -97,15 +97,14 @@ class DeleteContractService extends Service
             $params['index']                                = $this->index;
             $params['type']                                 = "annotations";
             $params['body']['query']['term']['contract_id'] = $id;
-
             $delete = $this->deleteDocumentByQuery($params);
             $this->updateAnnotationInMaster($id);
-            logger()->info("Annotations deleted", $delete);
+            $deleted = isset($delete['_indices']['_all']['deleted']) ? $delete['_indices']['_all']['deleted'] : 0;
+            logger()->info(sprintf("%s annotations deleted", $deleted));
 
             return $delete;
         } catch (Missing404Exception $e) {
-            logger()->error("Annotaions not found", [$e->getMessage()]);
-
+            logger()->error("Annotations not found", [$e->getMessage()]);
             return "Annotations not found";
         }
     }
