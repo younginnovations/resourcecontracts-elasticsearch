@@ -22,6 +22,10 @@ class ApiController extends BaseController
 
     /**
      * Indexes metadata
+<<<<<<< Updated upstream
+=======
+     *
+>>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function metadata()
@@ -42,7 +46,7 @@ class ApiController extends BaseController
             ];
 
             if ($response = $metadata->index($data)) {
-                return $this->json($response);
+                return $this->json(['result' => $response]);
             }
 
             return $this->json(['result' => 'failed']);
@@ -50,96 +54,153 @@ class ApiController extends BaseController
         } catch (\Exception $e) {
             return $this->json(['result' => $e->getMessage()]);
         }
-
     }
 
     /**
      * Indexes Pdf Text
+<<<<<<< Updated upstream
+=======
+     *
+>>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function pdfText()
     {
-        $pdfText = new PdfTextService();
+        try {
+            $pdfText = new PdfTextService();
 
-        if ($response = $pdfText->index($this->request->request->all())) {
-            return $this->json($response);
+            if ($response = $pdfText->index($this->request->request->all())) {
+                return $this->json(['result' => $response]);
+            }
+
+            return $this->json(['result' => 'failed']);
+
+        } catch (\Exception $e) {
+            return $this->json(['result' => $e->getMessage()]);
         }
-
-        return $this->json(['failed']);
     }
-
 
     /**
      * Indexes Annotation
+<<<<<<< Updated upstream
+=======
+     *
+>>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function annotation()
     {
-        $annotations = new AnnotationsService();
+        try {
+            $annotations = new AnnotationsService();
 
-        if ($response = $annotations->index($this->request->request->all())) {
-            return $this->json($response);
+            if ($response = $annotations->index($this->request->request->all())) {
+                return $this->json(['result' => $response]);
+            }
+
+            return $this->json(['result' => 'failed']);
+        } catch (\Exception $e) {
+            return $this->json(['result' => $e->getMessage()]);
         }
-
-        return $this->json(['failed']);
     }
-
 
     /**
      * Deletes Contract
+<<<<<<< Updated upstream
+=======
+     *
+>>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteContract()
     {
-        $contract = new DeleteContractService();
-        if ($response = $contract->deleteContract($this->request->request->all())) {
-            return $this->json($response);
-        }
+        try {
+            $contract = new DeleteContractService();
 
-        return $this->json(['failed']);
+            if ($response = $contract->deleteContract($this->request->request->all())) {
+                return $this->json(['result' => $response]);
+            }
+
+            return $this->json(['result' => 'failed']);
+        } catch (\Exception $e) {
+            return $this->json(['result' => $e->getMessage()]);
+        }
     }
 
     /**
+<<<<<<< Updated upstream
      * Deletes contract annotations
+=======
+     * Deletes contract's annotations
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+>>>>>>> Stashed changes
      */
     public function deleteContractAnnotation()
     {
-        $contract   = new DeleteContractService();
-        $contractId = $this->request->request->all();
-        if ($response = $contract->deleteAnnotations($contractId['contract_id'])) {
-            return $this->json($response);
-        }
+        try {
+            $contract   = new DeleteContractService();
+            $contractId = $this->request->request->all();
 
-        return $this->json(['failed']);
+            if ($response = $contract->deleteAnnotations($contractId['contract_id'])) {
+                return $this->json(['result' => $response]);
+            }
+
+            return $this->json(['result' => 'failed']);
+        } catch (\Exception $e) {
+            return $this->json(['result' => $e->getMessage()]);
+        }
     }
 
     /**
      * Deletes contract's document from metadata and master
+<<<<<<< Updated upstream
+=======
+     *
+>>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteContractMetadata()
     {
-        $contract   = new DeleteContractService();
-        $contractId = $this->request->request->all();
-        if ($response = $contract->deleteMetadata($contractId['contract_id']) && $contract->deleteMaster($contractId['contract_id'])) {
-            return $this->json($response);
-        }
+        try {
+            $contract   = new DeleteContractService();
+            $contractId = $this->request->request->all();
+            $response   = ($contract->deleteMetadata($contractId['contract_id'])
+                && $contract->deleteMaster($contractId['contract_id']));
+            if ($response) {
+                return $this->json(['result' => $response]);
+            }
 
-        return $this->json(['failed']);
+            return $this->json(['result' => 'failed']);
+        } catch (\Exception $e) {
+            return $this->json(['result' => $e->getMessage()]);
+        }
     }
 
     /**
      * Deletes text document from pdf_text
+<<<<<<< Updated upstream
+=======
+     *
+>>>>>>> Stashed changes
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteContractText()
     {
-        $contract   = new DeleteContractService();
-        $contractId = $this->request->request->all();
-        if ($response = $contract->deletePdfText($contractId['contract_id'])) {
-            return $this->json($response);
-        }
+        try {
+            $contract   = new DeleteContractService();
+            $contractId = $this->request->request->all();
 
+<<<<<<< Updated upstream
         return $this->json(['failed']);
+=======
+            if ($response = $contract->deletePdfText($contractId['contract_id'])) {
+                return $this->json(['result' => $response]);
+            }
+
+            return $this->json(['result' => 'failed']);
+        } catch (\Exception $e) {
+            return $this->json(['result' => $e->getMessage()]);
+        }
+>>>>>>> Stashed changes
     }
 }
