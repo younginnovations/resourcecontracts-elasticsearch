@@ -37,17 +37,19 @@ class LogViewer
      * Get complete log file path
      *
      * @param $file
+     *
      * @return string
      */
     public function fullPath($file)
     {
-        return $this->logPath() . '/' . $file;
+        return $this->logPath().'/'.$file;
     }
 
     /**
      * Get log content
      *
      * @param $file
+     *
      * @return string
      */
     public function getLogContent($file)
@@ -61,6 +63,7 @@ class LogViewer
      * Get Log List from a file
      *
      * @param $file
+     *
      * @return object
      */
     public function getLogList($file)
@@ -69,15 +72,18 @@ class LogViewer
         $logs = array_filter(explode("\n", $logs));
 
         foreach ($logs as &$log) {
-            $arr  = array_map('trim', explode(']', $log));
-            $date = ltrim($arr[0], '[');
-            list($type, $message) = array_map('trim', explode(':', $arr[1]));
-            $type = explode($this->log->logName, $type);
-            $type = ltrim(strtolower(end($type)), '.');
-            $log  = (object) [
+            $arr   = array_map('trim', explode(']', $log));
+            $date  = ltrim($arr[0], '[');
+            $array = array_map('trim', explode(':', $arr[1]));
+            $type  = $array[0];
+            unset($array[0]);
+            $message = join(' ', $array);
+            $type    = explode($this->log->logName, $type);
+            $type    = ltrim(strtolower(end($type)), '.');
+            $log     = (object) [
                 'date'    => $date,
                 'type'    => $this->getTypeSet($type),
-                'message' => $message
+                'message' => $message,
             ];
         }
 
