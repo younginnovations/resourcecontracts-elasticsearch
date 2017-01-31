@@ -23,7 +23,9 @@ class DeleteContractService extends Service
 
     /**
      * Delete Contract
+     *
      * @param $request
+     *
      * @return mixed
      */
     public function deleteContract($request)
@@ -39,7 +41,9 @@ class DeleteContractService extends Service
 
     /**
      * Delete Metadata
+     *
      * @param $id
+     *
      * @return array
      */
     public function deleteMetadata($id)
@@ -63,7 +67,9 @@ class DeleteContractService extends Service
 
     /**
      * Delete Pdf TExt
+     *
      * @param $id
+     *
      * @return array
      */
     public function deletePdfText($id)
@@ -88,7 +94,9 @@ class DeleteContractService extends Service
 
     /**
      * Delete Annotations
+     *
      * @param $id
+     *
      * @return array
      */
     public function deleteAnnotations($id)
@@ -97,7 +105,7 @@ class DeleteContractService extends Service
             $params['index']                                = $this->index;
             $params['type']                                 = "annotations";
             $params['body']['query']['term']['contract_id'] = $id;
-            $delete = $this->deleteDocumentByQuery($params);
+            $delete                                         = $this->deleteDocumentByQuery($params);
             $this->updateAnnotationInMaster($id);
             $deleted = isset($delete['_indices']['_all']['deleted']) ? $delete['_indices']['_all']['deleted'] : 0;
             logger()->info(sprintf("%s annotations deleted", $deleted));
@@ -105,13 +113,16 @@ class DeleteContractService extends Service
             return $delete;
         } catch (Missing404Exception $e) {
             logger()->warning("Annotations not found", [$e->getMessage()]);
+
             return "Annotations not found";
         }
     }
 
     /**
      * Delete contract from master type
+     *
      * @param $id
+     *
      * @return array
      */
     public function deleteMaster($id)
@@ -133,7 +144,9 @@ class DeleteContractService extends Service
 
     /**
      * Delete text from master
+     *
      * @param $id
+     *
      * @return array|string
      */
     public function updateTextInMaster($id)
@@ -143,7 +156,7 @@ class DeleteContractService extends Service
             $params['type']        = "master";
             $params['id']          = $id;
             $params['body']['doc'] = [
-                "pdf_text_string" => ""
+                "pdf_text_string" => "",
             ];
 
             $response = $this->es->update($params);
@@ -159,7 +172,9 @@ class DeleteContractService extends Service
 
     /**
      * Delete annotation's text and annotation category from master
+     *
      * @param $id
+     *
      * @return array|string
      */
     public function updateAnnotationInMaster($id)
@@ -169,8 +184,8 @@ class DeleteContractService extends Service
             $params['type']        = "master";
             $params['id']          = $id;
             $params['body']['doc'] = [
-                "annotations_category" => "",
-                "annotations_string"   => ""
+                "annotations_category" => [],
+                "annotations_string"   => [],
             ];
 
             $response = $this->es->update($params);
