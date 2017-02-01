@@ -33,6 +33,11 @@ RUN a2enmod rewrite \
  && mkdir -p /var/log/supervisor \
  && mkdir -p /var/www/rc-index/logs
 
+# Configure PHP
+RUN sed -i "s/^post_max_size =.*/post_max_size = 5120M/" /etc/php5/apache2/php.ini \
+ && sed -i "s/^upload_max_filesize =.*/upload_max_filesize = 5120M/" /etc/php5/apache2/php.ini \
+ && sed -i "s/^memory_limit =.*/memory_limit = 256M/" /etc/php5/apache2/php.ini
+
 WORKDIR /var/www/rc-index
 
 COPY conf/init.sh /var/container_init/init.sh
