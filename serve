@@ -1,0 +1,67 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Class command
+ */
+class command
+{
+    /**
+     * @var string
+     */
+    protected $base;
+
+    /**
+     * command constructor.
+     */
+    public function __construct()
+    {
+        $this->base = dirname(__FILE__);
+    }
+
+    /**
+     * Run serve command
+     */
+    public function run()
+    {
+        chdir($this->base.'/public');
+        $host = $this->getOption('h', 'host', 'localhost');
+        $port = $this->getOption('p', 'port', '8000');
+        echo "RC Index server started on http://{$host}:{$port}/".PHP_EOL;
+        passthru('"'.PHP_BINARY.'"'." -S {$host}:{$port}");
+    }
+
+    /**
+     * Get Option
+     *
+     * @param $short
+     * @param $long
+     * @param $default
+     *
+     * @return string
+     */
+    public function getOption($short, $long, $default)
+    {
+        $options = $this->commandOptions();
+        $default = isset($options[$short]) ? $options[$short] : $default;
+
+        return isset($options[$long]) ? $options[$long] : $default;
+    }
+
+    /**
+     * Get Command Options
+     *
+     * @return array
+     */
+    public function commandOptions()
+    {
+        return getopt('h:p:', ['host:', 'port:']);
+    }
+
+}
+
+$command = new command();
+$command->run();
+
+
+

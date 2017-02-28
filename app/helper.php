@@ -4,20 +4,21 @@
  * Get View content
  *
  * @param $page
+ *
  * @return string
  * @throws Exception
  */
 function view($page, $data = [])
 {
     extract($data);
-    $view_path = trim(config('view_path') ,'/');
+    $view_path = app_path().'/'.trim(config('view_path'), '/');
     $file      = sprintf('%s/%s.php', $view_path, $page);
-    if(!file_exists($file))
-    {
-        throw new Exception($page .' not found.');
+    if (!file_exists($file)) {
+        throw new Exception($page.' not found.');
     }
     ob_start();
     require($file);
+
     return ob_get_clean();
 }
 
@@ -26,9 +27,10 @@ function view($page, $data = [])
  *
  * @param string $key
  * @param null   $default
+ *
  * @return string/array/null
  */
-function config($key='', $default=null)
+function config($key = '', $default = null)
 {
     $config = require 'config.php';
 
@@ -53,11 +55,13 @@ function app_path()
  * Application Url
  *
  * @param string $uri
+ *
  * @return string
  */
-function url($uri ='')
+function url($uri = '')
 {
     $uri = trim($uri);
+
     return 'http://'.$_SERVER['HTTP_HOST'].'/'.trim($uri, '/');
 }
 
@@ -65,8 +69,7 @@ function logger($message = null)
 {
     $log = new \App\Services\Log\Logger();
 
-    if(is_null($message))
-    {
+    if (is_null($message)) {
         return $log;
     }
 
