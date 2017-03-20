@@ -26,20 +26,21 @@ class MetadataService extends Service
 
     /**
      * Creates document
+     *
      * @param array $metaData
+     *
      * @return array
      */
     public function index($metaData)
     {
         try {
-            $params        = $this->getIndexType();
-            $params['id']  = $metaData['id'];
-            $document      = $this->es->exists($params);
-            $metadata      = json_decode($metaData['metadata']);
-            $metadatatrans = json_decode($metaData['metadata_trans']);
-            $createdBy     = json_decode($metaData['created_by']);
-            $updatedBy     = json_decode($metaData['updated_by']);
-            $data          = [
+            $params       = $this->getIndexType();
+            $params['id'] = $metaData['id'];
+            $document     = $this->es->exists($params);
+            $metadata     = json_decode($metaData['metadata']);
+            $createdBy    = json_decode($metaData['created_by']);
+            $updatedBy    = json_decode($metaData['updated_by']);
+            $data         = [
                 'contract_id'          => $metaData['id'],
                 'en'                   => $metadata->en,
                 'fr'                   => $metadata->fr,
@@ -50,11 +51,11 @@ class MetadataService extends Service
                 'created_user_name'    => $createdBy->name,
                 'created_user_email'   => $createdBy->email,
                 'supporting_contracts' => $metaData['supporting_contracts'],
-                'created_at'           => date('Y-m-d', strtotime($metaData['created_at'])) . 'T' . date(
+                'created_at'           => date('Y-m-d', strtotime($metaData['created_at'])).'T'.date(
                         'H:i:s',
                         strtotime($metaData['created_at'])
                     ),
-                'updated_at'           => date('Y-m-d', strtotime($metaData['updated_at'])) . 'T' . date(
+                'updated_at'           => date('Y-m-d', strtotime($metaData['updated_at'])).'T'.date(
                         'H:i:s',
                         strtotime($metaData['updated_at'])
                     ),
@@ -146,7 +147,9 @@ class MetadataService extends Service
 
     /**
      * Deletes document
+     *
      * @param $id
+     *
      * @return array
      */
     public function delete($id)
@@ -159,16 +162,18 @@ class MetadataService extends Service
 
     /**
      * Creates document
-     * @param array response
+     *
+     * @param $contractId
+     * @param $metadata
+     *
      * @return array
      */
-    public function insertIntoMaster($contracId, $metadata)
+    public function insertIntoMaster($contractId, $metadata)
     {
         try {
-            $response        = [];
             $params['index'] = $this->index;
             $params['type']  = "master";
-            $params['id']    = $contracId;
+            $params['id']    = $contractId;
             $document        = $this->es->exists($params);
             $body            = [
                 "en"                   => $this->filterMetadata($metadata->en),
@@ -177,11 +182,11 @@ class MetadataService extends Service
                 "metadata_string"      => [
                     "en" => $this->getMetadataString($this->removeURL($metadata->en)),
                     "fr" => $this->getMetadataString($this->removeURL($metadata->fr)),
-                    "ar" => $this->getMetadataString($this->removeURL($metadata->ar))
+                    "ar" => $this->getMetadataString($this->removeURL($metadata->ar)),
                 ],
                 "pdf_text_string"      => [],
                 "annotations_category" => [],
-                "annotations_string"   => []
+                "annotations_string"   => [],
             ];
 
             if ($document) {
@@ -192,15 +197,16 @@ class MetadataService extends Service
                     "metadata_string" => [
                         "en" => $this->getMetadataString($this->removeURL($metadata->en)),
                         "fr" => $this->getMetadataString($this->removeURL($metadata->fr)),
-                        "ar" => $this->getMetadataString($this->removeURL($metadata->ar))
+                        "ar" => $this->getMetadataString($this->removeURL($metadata->ar)),
                     ],
                 ];
 
                 $response = $this->es->update($params);
+
                 return $response;
             }
             $params['body'] = $body;
-            $response = $this->es->index($params);
+            $response       = $this->es->index($params);
 
             return $response;
         } catch (Exception $e) {
@@ -250,31 +256,10 @@ class MetadataService extends Service
     }
 
     /**
-     * Gets Metadata String
-     *
-     * @param        $metadata
-     * @param string $data
-     *
-     * @return string
-     */
-    private function getMetadataString($metadata, $data = '')
-    {
-        foreach ($metadata as $value) {
-            if (is_array($value) || is_object($value)) {
-                $data = $this->getMetadataString($value, $data);
-            } else {
-                if ($value != '') {
-                    $data .= ' ' . $value;
-                }
-            }
-        }
-
-        return trim($data);
-    }
-
-    /**
      * Removes url from metadata
+     *
      * @param $metadata
+     *
      * @return array $metadata
      */
     public function removeURL($metadata)
@@ -287,7 +272,7 @@ class MetadataService extends Service
 
             foreach ($metadatas->company as $company) {
                 unset($metadatas->company[$i]->open_corporate_id);
-                $i ++;
+                $i++;
             }
             logger()->info("URL removed metadata", (array) $metadatas);
 
@@ -308,11 +293,12 @@ class MetadataService extends Service
 
         if (!$condition) {
             $this->es->indices()->create(['index' => $this->index]);
-            $metadata    = $this->createMetadataMapping();
-            $master      = $this->createMasterMapping();
-            $annotations = $this->createAnnotationsMapping();
-            $pdftext     = $this->createPdfTextMapping();
+            $this->createMetadataMapping();
+            $this->createMasterMapping();
+            $this->createAnnotationsMapping();
+            $this->createPdfTextMapping();
             logger()->info("master mapping");
+
             return true;
         }
 
@@ -337,13 +323,13 @@ class MetadataService extends Service
                             "type" => "integer",
                         ],
                     "en"                   => [
-                        "properties" => $this->metadataMapping()
+                        "properties" => $this->metadataMapping(),
                     ],
                     "ar"                   => [
-                        "properties" => $this->metadataMapping()
+                        "properties" => $this->metadataMapping(),
                     ],
                     "fr"                   => [
-                        "properties" => $this->metadataMapping()
+                        "properties" => $this->metadataMapping(),
                     ],
                     "file_size"            =>
                         [
@@ -365,7 +351,7 @@ class MetadataService extends Service
                         [
                             "type" => "string",
                         ],
-                    "total_pages"     =>
+                    "total_pages"          =>
                         [
                             "type" => "integer",
                         ],
@@ -373,7 +359,7 @@ class MetadataService extends Service
                         [
                             "type" => "string",
                         ],
-                    "created_user_name"   =>
+                    "created_user_name"    =>
                         [
                             "type" => "string",
                         ],
@@ -405,12 +391,12 @@ class MetadataService extends Service
                             "type"   => "date",
                             "format" => "dateOptionalTime",
                         ],
-                ]
+                ],
 
             ];
 
             $params['body'][$this->type] = $mapping;
-            $metadata = $this->es->indices()->putMapping($params);
+            $metadata                    = $this->es->indices()->putMapping($params);
             logger()->info("Metadata Mapping done", $metadata);
 
             return 1;
@@ -419,6 +405,106 @@ class MetadataService extends Service
 
             return 0;
         }
+    }
+
+    /**
+     * Gets Master Mapping
+     * @return array
+     */
+    public function getMasterMapping()
+    {
+        return [
+            "properties" => [
+                "contract_name"       => [
+                    "type"     => "string",
+                    "analyzer" => "english",
+                    "fields"   => [
+                        "raw" => [
+                            "type"  => "string",
+                            "index" => "not_analyzed",
+                        ],
+                    ],
+
+                ],
+                "open_contracting_id" => [
+                    "type"  => "string",
+                    "index" => "not_analyzed",
+                ],
+                "country_name"        => [
+                    "type"  => "string",
+                    "index" => "not_analyzed",
+                ],
+                "country_code"        => [
+                    "type" => "string",
+                ],
+                "signature_year"      => [
+                    "type" => "string",
+                ],
+                "signature_date"      => [
+                    'type'   => 'date',
+                    'format' => 'dateOptionalTime',
+                ],
+                "resource_raw"        => [
+                    "type"  => "string",
+                    "index" => "not_analyzed",
+                ],
+                "file_size"           => [
+                    "type" => "integer",
+                ],
+                "language"            => [
+                    "type" => "string",
+                ],
+                "category"            => [
+                    "type" => "string",
+                ],
+                "contract_type"       => [
+                    "type"  => "string",
+                    "index" => "not_analyzed",
+                ],
+                "document_type"       =>
+                    [
+                        "type"     => "string",
+                        "analyzer" => "english",
+                        "fields"   => [
+                            "raw" => [
+                                "type"  => "string",
+                                "index" => "not_analyzed",
+                            ],
+                        ],
+                    ],
+                "company_name"        => [
+                    "type"  => "string",
+                    "index" => "not_analyzed",
+                ],
+                "corporate_grouping"  => [
+                    "type"  => "string",
+                    "index" => "not_analyzed",
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Gets Metadata String
+     *
+     * @param        $metadata
+     * @param string $data
+     *
+     * @return string
+     */
+    private function getMetadataString($metadata, $data = '')
+    {
+        foreach ($metadata as $value) {
+            if (is_array($value) || is_object($value)) {
+                $data = $this->getMetadataString($value, $data);
+            } else {
+                if ($value != '') {
+                    $data .= ' '.$value;
+                }
+            }
+        }
+
+        return trim($data);
     }
 
     /**
@@ -437,28 +523,38 @@ class MetadataService extends Service
                     "ar"                   => $this->getMasterMapping(),
                     "annotations_category" => [
                         "type"  => "string",
-                        "index" => "not_analyzed"
+                        "index" => "not_analyzed",
                     ],
                     "metadata_string"      => [
-                        "properties"=>[
-                            "en"=>[
-                                "type" => "string"
+                        "properties" => [
+                            "en" => [
+                                "type" => "string",
                             ],
-                            "fr"=>[
-                                "type"=>"string"
+                            "fr" => [
+                                "type" => "string",
                             ],
-                            "ar"=>[
-                                "type"=>"string"
-                            ]
-                        ]
+                            "ar" => [
+                                "type" => "string",
+                            ],
+                        ],
                     ],
                     "pdf_text_string"      => [
-                        "type" => "string"
+                        "type" => "string",
                     ],
                     "annotations_string"   => [
-                        "type" => "string"
-                    ]
-                ]
+                        "properties" => [
+                            "en" => [
+                                "type" => "string",
+                            ],
+                            "fr" => [
+                                "type" => "string",
+                            ],
+                            "ar" => [
+                                "type" => "string",
+                            ],
+                        ],
+                    ],
+                ],
             ];
 
             $params['body']["master"] = $mapping;
@@ -486,7 +582,33 @@ class MetadataService extends Service
                 "properties" => [
                     "open_contracting_id" => [
                         "type"  => "string",
-                        "index" => "not_analyzed"
+                        "index" => "not_analyzed",
+                    ],
+                    "annotation_text"     => [
+                        "properties" => [
+                            "en" => [
+                                "type" => "string",
+                            ],
+                            "fr" => [
+                                "type" => "string",
+                            ],
+                            "ar" => [
+                                "type" => "string",
+                            ],
+                        ],
+                    ],
+                    "article_reference"   => [
+                        "properties" => [
+                            "en" => [
+                                "type" => "string",
+                            ],
+                            "fr" => [
+                                "type" => "string",
+                            ],
+                            "ar" => [
+                                "type" => "string",
+                            ],
+                        ],
                     ],
                     "category"            =>
                         [
@@ -495,11 +617,11 @@ class MetadataService extends Service
                             "fields"   => [
                                 "raw" => [
                                     "type"  => "string",
-                                    "index" => "not_analyzed"
-                                ]
-                            ]
+                                    "index" => "not_analyzed",
+                                ],
+                            ],
                         ],
-                ]
+                ],
             ];
 
             $params['body']["annotations"] = $mapping;
@@ -527,15 +649,16 @@ class MetadataService extends Service
                 "properties" => [
                     "open_contracting_id" => [
                         "type"  => "string",
-                        "index" => "not_analyzed"
+                        "index" => "not_analyzed",
                     ],
-                ]
+                ],
             ];
-            $params['body']["pdf_text"] = $mapping;
-            $pdftext                    = $this->es->indices()->putMapping($params);
-            logger()->info("Pdf Text mapping created", $pdftext);
 
-            return $pdftext;
+            $params['body']["pdf_text"] = $mapping;
+            $pdfText                    = $this->es->indices()->putMapping($params);
+            logger()->info("Pdf Text mapping created", $pdfText);
+
+            return $pdfText;
         } catch (Exception $e) {
             logger()->error("Pdf Text Mapping Error", [$e->getMessage()]);
 
@@ -558,17 +681,17 @@ class MetadataService extends Service
                         "fields"   => [
                             "raw" => [
                                 "type"  => "string",
-                                "index" => "not_analyzed"
-                            ]
-                        ]
+                                "index" => "not_analyzed",
+                            ],
+                        ],
                     ],
                 "open_contracting_id"  => [
                     "type"  => "string",
-                    "index" => "not_analyzed"
+                    "index" => "not_analyzed",
                 ],
                 "show_pdf_text"        =>
                     [
-                        "type" => "integer"
+                        "type" => "integer",
                     ],
                 "contract_identifier"  =>
                     [
@@ -593,9 +716,9 @@ class MetadataService extends Service
                                         "fields"   => [
                                             "raw" => [
                                                 "type"  => "string",
-                                                "index" => "not_analyzed"
-                                            ]
-                                        ]
+                                                "index" => "not_analyzed",
+                                            ],
+                                        ],
                                     ],
                             ],
                     ],
@@ -606,9 +729,9 @@ class MetadataService extends Service
                         "fields"   => [
                             "raw" => [
                                 "type"  => "string",
-                                "index" => "not_analyzed"
-                            ]
-                        ]
+                                "index" => "not_analyzed",
+                            ],
+                        ],
                     ],
                 "government_entity"    =>
                     [
@@ -616,13 +739,13 @@ class MetadataService extends Service
                             [
                                 "entity"     =>
                                     [
-                                        "type" => "string"
+                                        "type" => "string",
                                     ],
                                 "identifier" =>
                                     [
-                                        "type" => "string"
-                                    ]
-                            ]
+                                        "type" => "string",
+                                    ],
+                            ],
                     ],
                 "type_of_contract"     =>
                     [
@@ -631,9 +754,9 @@ class MetadataService extends Service
                         "fields"   => [
                             "raw" => [
                                 "type"  => "string",
-                                "index" => "not_analyzed"
-                            ]
-                        ]
+                                "index" => "not_analyzed",
+                            ],
+                        ],
                     ],
                 "document_type"        =>
                     [
@@ -642,9 +765,9 @@ class MetadataService extends Service
                         "fields"   => [
                             "raw" => [
                                 "type"  => "string",
-                                "index" => "not_analyzed"
-                            ]
-                        ]
+                                "index" => "not_analyzed",
+                            ],
+                        ],
                     ],
                 "signature_date"       =>
                     [
@@ -665,15 +788,15 @@ class MetadataService extends Service
                             [
                                 "name"                          =>
                                     [
-                                        "type" => "string",
-                                        "fields"   => [
+                                        "type"   => "string",
+                                        "fields" => [
                                             "raw" => [
                                                 "type"  => "string",
-                                                "index" => "not_analyzed"
-                                            ]
-                                        ]
+                                                "index" => "not_analyzed",
+                                            ],
+                                        ],
                                     ],
-                                "participation_share"         =>
+                                "participation_share"           =>
                                     [
                                         "type" => "double",
                                     ],
@@ -681,9 +804,9 @@ class MetadataService extends Service
                                     [
                                         "type" => "string",
                                     ],
-                                "registration_agency"          =>
+                                "registration_agency"           =>
                                     [
-                                        "type" => "string"
+                                        "type" => "string",
                                     ],
                                 "company_founding_date"         =>
                                     [
@@ -757,7 +880,7 @@ class MetadataService extends Service
                     ],
                 "is_contract_signed"   =>
                     [
-                        "type" => "string"
+                        "type" => "string",
                     ],
                 "translated_from"      =>
                     [
@@ -774,82 +897,5 @@ class MetadataService extends Service
                             ],
                     ],
             ];
-    }
-
-    /**
-     * Gets Master Mapping
-     * @return array
-     */
-    public function getMasterMapping()
-    {
-        return [
-            "properties" => [
-                "contract_name"       => [
-                    "type"     => "string",
-                    "analyzer" => "english",
-                    "fields"   => [
-                        "raw" => [
-                            "type"  => "string",
-                            "index" => "not_analyzed"
-                        ]
-                    ]
-
-                ],
-                "open_contracting_id" => [
-                    "type"  => "string",
-                    "index" => "not_analyzed"
-                ],
-                "country_name" => [
-                    "type"  => "string",
-                    "index" => "not_analyzed"
-                ],
-                "country_code"        => [
-                    "type" => "string"
-                ],
-                "signature_year"      => [
-                    "type" => "string"
-                ],
-                "signature_date"      => [
-                    'type'   => 'date',
-                    'format' => 'dateOptionalTime',
-                ],
-                "resource_raw"        => [
-                    "type"  => "string",
-                    "index" => "not_analyzed"
-                ],
-                "file_size"           => [
-                    "type" => "integer",
-                ],
-                "language"            => [
-                    "type" => "string"
-                ],
-                "category"            => [
-                    "type" => "string"
-                ],
-                "contract_type"       => [
-                    "type"  => "string",
-                    "index" => "not_analyzed"
-                ],
-                "document_type"       =>
-                    [
-                        "type"     => "string",
-                        "analyzer" => "english",
-                        "fields"   => [
-                            "raw" => [
-                                "type"  => "string",
-                                "index" => "not_analyzed"
-                            ]
-                        ]
-                    ],
-                "company_name"        => [
-                    "type"  => "string",
-                    "index" => "not_analyzed"
-                ],
-                "corporate_grouping"  => [
-                    "type"  => "string",
-                    "index" => "not_analyzed"
-                ]
-            ]
-        ];
     }
 }
