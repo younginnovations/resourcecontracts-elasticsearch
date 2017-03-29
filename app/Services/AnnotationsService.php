@@ -26,11 +26,28 @@ class AnnotationsService extends Service
             $response    = [];
             $contractId  = '';
 
+            $anno = [];
             foreach ($annotations as $annotation) {
                 $params          = [];
                 $params['index'] = $this->index;
                 $params['type']  = $this->type;
                 $params['id']    = $annotation['id'];
+
+                $annotation['annotation_text'] = [
+                    'en' => $annotation['text'],
+                    'fr' => $annotation['text_locale']['fr'],
+                    'ar' => $annotation['text_locale']['ar'],
+                ];
+
+                $annotation['article_reference'] = [
+                    'en' => $annotation['article_reference'],
+                    'fr' => $annotation['article_reference_locale']['fr'],
+                    'ar' => $annotation['article_reference_locale']['ar'],
+                ];
+
+                unset($annotation['text']);
+                unset($annotation['text_locale']);
+                unset($annotation['article_reference_locale']);
 
                 $doc = $annotation;
 
@@ -46,9 +63,10 @@ class AnnotationsService extends Service
                 }
 
                 $contractId = $annotation['contract_id'];
+                $anno[]     = $annotation;
             }
 
-            $master = $this->insertIntoMaster($contractId, $annotations);
+            $master = $this->insertIntoMaster($contractId, $anno);
 
             return array_merge($response, $master);
         } catch (\Exception $e) {
@@ -93,10 +111,12 @@ class AnnotationsService extends Service
             $document             = $this->es->exists($params);
             $annotations_category = $this->getAnnotationsCategory($annotations);
             $annotations_category = $annotations_category == '' ? [] : $annotations_category;
-            $annotations_string   = $this->getAnnotationsString($annotations);
-            $annotations_string   = $annotations_string == '' ? [] : $annotations_string;
-
-            $body = [
+            $annotations_string[] = [
+                "en" => $this->getAnnotationsString($annotations, 'en'),
+                "fr" => $this->getAnnotationsString($annotations, 'fr'),
+                "ar" => $this->getAnnotationsString($annotations, 'ar'),
+            ];
+            $body                 = [
                 "metadata"             => [],
                 "metadata_string"      => [],
                 "pdf_text_string"      => [],
@@ -131,14 +151,18 @@ class AnnotationsService extends Service
      *
      * @param $annotations
      *
+     * @param $lang
+     *
      * @return string
      */
-    private function getAnnotationsString($annotations)
+    private function getAnnotationsString($annotations, $lang)
     {
         $data = '';
 
+        logger()->info("Annotations".$lang, $annotations);
+
         foreach ($annotations as $annotation) {
-            $text = isset($annotation['text']) ? $annotation['text'] : "";
+            $text = isset($annotation['annotation_text'][$lang]) ? $annotation['annotation_text'][$lang] : "";
             $data .= ' '.$text;
         }
 
@@ -147,7 +171,9 @@ class AnnotationsService extends Service
             $data .= ' '.$text;
         }
 
-        return trim($data);
+        $data = trim($data);
+
+        return $data ?: [];
     }
 
     /**

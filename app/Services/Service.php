@@ -38,13 +38,15 @@ class Service
     {
         return [
             'index' => $this->index,
-            'type'  => $this->type
+            'type'  => $this->type,
         ];
     }
 
     /**
      * Delete a document by id
+     *
      * @param $param
+     *
      * @return array
      */
     public function deleteDocument($param)
@@ -54,12 +56,13 @@ class Service
 
     /**
      * Delete a document By query
+     *
      * @param $param
+     *
      * @return array
      */
     public function deleteDocumentByQuery($param)
     {
         return $this->es->deleteByQuery($param);
     }
-
 }

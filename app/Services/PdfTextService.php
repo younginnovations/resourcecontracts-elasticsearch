@@ -8,7 +8,6 @@ use League\Route\Http\Exception;
  */
 class PdfTextService extends Service
 {
-
     /**
      *  ES Type
      * @var string
@@ -17,7 +16,9 @@ class PdfTextService extends Service
 
     /**
      * Create or Update a document
+     *
      * @param $textData
+     *
      * @return array
      */
     public function index($textData)
@@ -64,13 +65,14 @@ class PdfTextService extends Service
 
     /**
      * Create or Update a document
-     * @param $contractId ,$pdftext
+     *
+     * @param $contractId ,$pdfText
+     *
      * @return array
      */
-    private function insertIntoMaster($contractId, $pdftext)
+    private function insertIntoMaster($contractId, $pdfText)
     {
         try {
-            $response        = [];
             $params['index'] = $this->index;
             $params['type']  = "master";
             $params['id']    = $contractId;
@@ -78,12 +80,12 @@ class PdfTextService extends Service
             $body            = [
                 "metadata"             => [],
                 "metadata_string"      => [],
-                "pdf_text_string"      => $this->getPdfTextString($pdftext),
+                "pdf_text_string"      => $this->getPdfTextString($pdfText),
                 "annotations_category" => [],
-                "annotations_string"   => []
+                "annotations_string"   => [],
             ];
             if ($document) {
-                $params['body']['doc'] = ["pdf_text_string" => $this->getPdfTextString($pdftext),];
+                $params['body']['doc'] = ["pdf_text_string" => $this->getPdfTextString($pdfText),];
 
                 $response = $this->es->update($params);
                 logger()->info("Pdf text updated in master index", $response);
@@ -94,7 +96,7 @@ class PdfTextService extends Service
 
             $response = $this->es->index($params);
 
-            //logger()->info("Pdf text created in master index", $response);
+            logger()->info("Pdf text created in master index", $response);
 
             return $response;
         } catch (Exception $e) {
@@ -104,16 +106,22 @@ class PdfTextService extends Service
         }
     }
 
-    private function getPdfTextString($pdftext)
+    /**
+     * Get Pdf Text String
+     *
+     * @param $pdfText
+     *
+     * @return string
+     */
+    private function getPdfTextString($pdfText)
     {
-
         $data = '';
-        foreach ($pdftext as $text) {
-            $data .= strip_tags($text['text']) . ' ';
+
+        foreach ($pdfText as $text) {
+            $data .= strip_tags($text['text']).' ';
         }
 
         return trim($data);
     }
-
 
 }
