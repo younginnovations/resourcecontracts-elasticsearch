@@ -25,7 +25,7 @@ build:
 
     - docker build -t nrgi/rc-index:$BRANCH.$COMMIT .
     # Create the `latest` tag and force it in case the tag is already there from a previous build
-    - docker tag -f nrgi/rc-index:$BRANCH.$COMMIT nrgi/rc-index:$BRANCH
+    - docker tag nrgi/rc-index:$BRANCH.$COMMIT nrgi/rc-index:$BRANCH
 
     - docker push nrgi/rc-index:$BRANCH
     - docker push nrgi/rc-index:$BRANCH.$COMMIT
