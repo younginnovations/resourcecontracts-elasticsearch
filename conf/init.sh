@@ -7,3 +7,5 @@ envsubst < ./env.template > /var/www/rc-index/.env
 
 #log_files
 envsubst '${DEPLOYMENT_TYPE}' < ./log_files.yml.template > /etc/log_files.yml
+
+/usr/bin/supervisord -c /etc/supervisord.conf

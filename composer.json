@@ -2,9 +2,9 @@
   "name": "yipl/rces",
   "type": "project",
   "require": {
-    "elasticsearch/elasticsearch": "~2.0",
+    "elasticsearch/elasticsearch": "~5.0",
     "league/route": "^1.1",
-    "vlucas/phpdotenv": "^2.0",
+    "vlucas/phpdotenv": "^2.4",
     "monolog/monolog": "^1.17"
   },
   "autoload": {

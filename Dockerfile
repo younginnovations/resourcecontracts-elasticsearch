@@ -1,16 +1,18 @@
-FROM ubuntu:14.04
+FROM php:7.1.22-apache-jessie
 MAINTAINER Anjesh Tuladhar <anjesh@yipl.com.np>
 
 RUN apt-get update && apt-get install -y \
     curl \
     git \
     wget \
-    apache2 \
-    php5 \
-    php5-cli \
-    php5-curl \
-    php5-mcrypt \
-    php5-readline \
+    zip \
+    unzip \
+    gcc \
+    make \
+    autoconf \
+    libc-dev \
+    pkg-config \
+    libmcrypt-dev \
     supervisor \
     gettext \
  && rm -rf /var/lib/apt/lists/* \
@@ -25,18 +27,10 @@ RUN ln -s /etc/apache2/sites-available/rc-index.conf /etc/apache2/sites-enabled/
  && rm -f /etc/apache2/sites-enabled/000-default.conf
 
 RUN a2enmod rewrite \
- && a2enmod php5 \
- && ln -s /etc/php5/mods-available/mcrypt.ini /etc/php5/apache2/conf.d/20-mcrypt.ini \
- && ln -s /etc/php5/mods-available/mcrypt.ini /etc/php5/cli/conf.d/20-mcrypt.ini \
  && mkdir -p /var/container_init \
  && mkdir -p /var/www/rc-index \
  && mkdir -p /var/log/supervisor \
  && mkdir -p /var/www/rc-index/logs
-
-# Configure PHP
-RUN sed -i "s/^post_max_size =.*/post_max_size = 5120M/" /etc/php5/apache2/php.ini \
- && sed -i "s/^upload_max_filesize =.*/upload_max_filesize = 5120M/" /etc/php5/apache2/php.ini \
- && sed -i "s/^memory_limit =.*/memory_limit = 256M/" /etc/php5/apache2/php.ini
 
 WORKDIR /var/www/rc-index
 
@@ -56,4 +50,4 @@ RUN php composer.phar dump-autoload --optimize \
  && chown -R www-data: /var/www/rc-index
 
 EXPOSE 80
-CMD cd /var/container_init && ./init.sh && /usr/bin/supervisord -c /etc/supervisord.conf && /usr/sbin/apache2ctl -D FOREGROUND
+CMD cd /var/container_init && ./init.sh
