@@ -776,7 +776,14 @@ class MetadataService extends Service
                     ],
                 "signature_year"       =>
                     [
-                        "type" => "string",
+                        "type"     => "string",
+                        "analyzer" => "english",
+                        "fields"   => [
+                            "raw" => [
+                                "type"  => "string",
+                                "index" => "not_analyzed",
+                            ],
+                        ],
                     ],
                 "translation_parent"   =>
                     [
