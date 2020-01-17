@@ -42,6 +42,10 @@ class ApiController extends BaseController
                 'supporting_contracts' => $this->request->request->get('supporting_contracts'),
             ];
 
+            if (!empty($this->request->request->get('published_at'))) {
+                $data['published_at'] = $this->request->request->get('published_at');
+            }
+
             if ($response = $metadata->index($data)) {
                 return $this->json(['result' => $response]);
             }
