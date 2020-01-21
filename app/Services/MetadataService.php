@@ -61,6 +61,13 @@ class MetadataService extends Service
                     ),
             ];
 
+            if (isset($metaData['published_at'])) {
+                $data['published_at'] = date('Y-m-d', strtotime($metaData['published_at'])).'T'.date(
+                        'H:i:s',
+                        strtotime($metaData['published_at'])
+                    );
+            }
+
             if ($document) {
                 $params['body']['doc'] = $data;
 
@@ -315,85 +322,7 @@ class MetadataService extends Service
             $params['index'] = $this->index;
             $this->es->indices()->refresh($params);
             $params['type'] = $this->type;
-            $mapping        = [
-                "properties" => [
-
-                    "contract_id"          =>
-                        [
-                            "type" => "integer",
-                        ],
-                    "en"                   => [
-                        "properties" => $this->metadataMapping(),
-                    ],
-                    "ar"                   => [
-                        "properties" => $this->metadataMapping(),
-                    ],
-                    "fr"                   => [
-                        "properties" => $this->metadataMapping(),
-                    ],
-                    "file_size"            =>
-                        [
-                            "type" => "long",
-                        ],
-                    "amla_url"             =>
-                        [
-                            "type" => "string",
-                        ],
-                    "file_url"             =>
-                        [
-                            "type" => "string",
-                        ],
-                    "word_file"            =>
-                        [
-                            "type" => "string",
-                        ],
-                    "updated_user_name"    =>
-                        [
-                            "type" => "string",
-                        ],
-                    "total_pages"          =>
-                        [
-                            "type" => "integer",
-                        ],
-                    "updated_user_email"   =>
-                        [
-                            "type" => "string",
-                        ],
-                    "created_user_name"    =>
-                        [
-                            "type" => "string",
-                        ],
-                    "created_user_email"   =>
-                        [
-                            "type" => "string",
-                        ],
-                    "supporting_contracts" =>
-                        [
-                            "properties" =>
-                                [
-                                    "id"            =>
-                                        [
-                                            "type" => "integer",
-                                        ],
-                                    "contract_name" =>
-                                        [
-                                            "type" => "string",
-                                        ],
-                                ],
-                        ],
-                    "created_at"           =>
-                        [
-                            "type"   => "date",
-                            "format" => "dateOptionalTime",
-                        ],
-                    "updated_at"           =>
-                        [
-                            "type"   => "date",
-                            "format" => "dateOptionalTime",
-                        ],
-                ],
-
-            ];
+            $mapping        = $this->getMetadataMapping();
 
             $params['body'][$this->type] = $mapping;
             $metadata                    = $this->es->indices()->putMapping($params);
@@ -408,12 +337,530 @@ class MetadataService extends Service
     }
 
     /**
+     * Returns Metadata Mapping according to language
+     *
+     * @return array
+     */
+    public function getMetadataLangMapping()
+    {
+        return [
+            'properties' =>
+                [
+                    'amla_url'                   =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'annexes_missing'            =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'category'                   =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'ckan'                       =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'company'                    =>
+                        [
+                            'properties' =>
+                                [
+                                    'company_address'               =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                    'company_founding_date'         =>
+                                        [
+                                            'type'   => 'date',
+                                            'format' => 'dateOptionalTime',
+                                        ],
+                                    'company_number'                =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                    'jurisdiction_of_incorporation' =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                    'name'                          =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'raw' =>
+                                                        [
+                                                            'type' => 'keyword',
+                                                        ],
+                                                ],
+                                        ],
+                                    'open_corporate_id'             =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                    'operator'                      =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                    'parent_company'                =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                    'participation_share'           =>
+                                        [
+                                            'type' => 'double',
+                                        ],
+                                    'registration_agency'           =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                ],
+                        ],
+                    'concession'                 =>
+                        [
+                            'properties' =>
+                                [
+                                    'license_identifier' =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                    'license_name'       =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                ],
+                        ],
+                    'contract_identifier'        =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'contract_name'              =>
+                        [
+                            'type'     => 'text',
+                            'fields'   =>
+                                [
+                                    'raw' =>
+                                        [
+                                            'type' => 'keyword',
+                                        ],
+                                ],
+                            'analyzer' => 'english',
+                        ],
+                    'contract_note'              =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'country'                    =>
+                        [
+                            'properties' =>
+                                [
+                                    'code' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'raw' =>
+                                                        [
+                                                            'type' => 'keyword',
+                                                        ],
+                                                ],
+                                        ],
+                                    'name' =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'raw' =>
+                                                        [
+                                                            'type' => 'keyword',
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                ],
+                        ],
+                    'date_retrieval'             =>
+                        [
+                            'type'   => 'date',
+                            'format' => 'dateOptionalTime',
+                        ],
+                    'deal_no'                    =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'deal_number'                =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'disclosure_mode'            =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'disclosure_mode_text'       =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'document_type'              =>
+                        [
+                            'type'     => 'text',
+                            'fields'   =>
+                                [
+                                    'raw' =>
+                                        [
+                                            'type' => 'keyword',
+                                        ],
+                                ],
+                            'analyzer' => 'english',
+                        ],
+                    'documentcloud_url'          =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'file_size'                  =>
+                        [
+                            'type' => 'integer',
+                        ],
+                    'file_url'                   =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'government_entity'          =>
+                        [
+                            'properties' =>
+                                [
+                                    [
+                                        'properties' =>
+                                            [
+                                                'entity'     =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                                'identifier' =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                            ],
+                                    ],
+                                    [
+                                        'properties' =>
+                                            [
+                                                'entity'     =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                                'identifier' =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                            ],
+                                    ],
+                                    [
+                                        'properties' =>
+                                            [
+                                                'entity'     =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                                'identifier' =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                            ],
+                                    ],
+                                    [
+                                        'properties' =>
+                                            [
+                                                'entity'     =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                                'identifier' =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                            ],
+                                    ],
+                                    [
+                                        'properties' =>
+                                            [
+                                                'entity'     =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                                'identifier' =>
+                                                    [
+                                                        'type' => 'text',
+                                                    ],
+                                            ],
+                                    ],
+                                    'entity'     =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                    'identifier' =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                ],
+                        ],
+                    'government_identifier'      =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'is_contract_signed'         =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'is_supporting_document'     =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'language'                   =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'matrix_page'                =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'open_contracting_id'        =>
+                        [
+                            'type' => 'keyword',
+                        ],
+                    'open_contracting_id_old'    =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'pages_missing'              =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'parent_open_contracting_id' =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'project_identifier'         =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'project_title'              =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'resource'                   =>
+                        [
+                            'type'     => 'text',
+                            'fields'   =>
+                                [
+                                    'raw' =>
+                                        [
+                                            'type' => 'keyword',
+                                        ],
+                                ],
+                            'analyzer' => 'english',
+                        ],
+                    'show_pdf_text'              =>
+                        [
+                            'type' => 'integer',
+                        ],
+                    'signature_date'             =>
+                        [
+                            'type'   => 'date',
+                            'format' => 'dateOptionalTime',
+                        ],
+                    'signature_year'             =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'raw' =>
+                                        [
+                                            'type' => 'keyword',
+                                        ],
+                                ],
+                        ],
+                    'source_url'                 =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'translated_from'            =>
+                        [
+                            'properties' =>
+                                [
+                                    'contract_name' =>
+                                        [
+                                            'type' => 'text',
+                                        ],
+                                    'id'            =>
+                                        [
+                                            'type' => 'integer',
+                                        ],
+                                ],
+                        ],
+                    'translation_from_original'  =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'translation_parent'         =>
+                        [
+                            'type' => 'text',
+                        ],
+                    'type_of_contract'           =>
+                        [
+                            'type'     => 'text',
+                            'fields'   =>
+                                [
+                                    'raw' =>
+                                        [
+                                            'type' => 'keyword',
+                                        ],
+                                ],
+                            'analyzer' => 'english',
+                        ],
+                    'word_file'                  =>
+                        [
+                            'type' => 'text',
+                        ],
+                ],
+        ];
+    }
+
+    /**
+     * Returns Metadata Mapping
+     *
+     * @return array
+     */
+    public function getMetadataMapping()
+    {
+        return [
+            'properties' => [
+                'amla_url'             =>
+                    [
+                        'type' => 'text',
+                    ],
+                'ar'                   => $this->getMetadataLangMapping(),
+                'contract_id'          =>
+                    [
+                        'type' => 'integer',
+                    ],
+                'created_at'           =>
+                    [
+                        'type'   => 'date',
+                        'format' => 'dateOptionalTime',
+                    ],
+                'created_user_email'   =>
+                    [
+                        'type' => 'text',
+                    ],
+                'created_user_name'    =>
+                    [
+                        'type' => 'text',
+                    ],
+                'en'                   => $this->getMetadataLangMapping(),
+                'file_size'            =>
+                    [
+                        'type' => 'long',
+                    ],
+                'file_url'             =>
+                    [
+                        'type' => 'text',
+                    ],
+                'fr'                   => $this->getMetadataLangMapping(),
+                'query'                =>
+                    [
+                        'properties' =>
+                            [
+                                'ids' =>
+                                    [
+                                        'properties' =>
+                                            [
+                                                'type'   =>
+                                                    [
+                                                        'type'   => 'text',
+                                                        'fields' =>
+                                                            [
+                                                                'keyword' =>
+                                                                    [
+                                                                        'type'         => 'keyword',
+                                                                        'ignore_above' => 256,
+                                                                    ],
+                                                            ],
+                                                    ],
+                                                'values' =>
+                                                    [
+                                                        'type'   => 'text',
+                                                        'fields' =>
+                                                            [
+                                                                'keyword' =>
+                                                                    [
+                                                                        'type'         => 'keyword',
+                                                                        'ignore_above' => 256,
+                                                                    ],
+                                                            ],
+                                                    ],
+                                            ],
+                                    ],
+                            ],
+                    ],
+                'supporting_contracts' =>
+                    [
+                        'properties' =>
+                            [
+                                'contract_name' =>
+                                    [
+                                        'type' => 'text',
+                                    ],
+                                'id'            =>
+                                    [
+                                        'type' => 'integer',
+                                    ],
+                            ],
+                    ],
+                'total_pages'          =>
+                    [
+                        'type' => 'integer',
+                    ],
+                'updated_at'           =>
+                    [
+                        'type'   => 'date',
+                        'format' => 'dateOptionalTime',
+                    ],
+                'updated_user_email'   =>
+                    [
+                        'type' => 'text',
+                    ],
+                'updated_user_name'    =>
+                    [
+                        'type' => 'text',
+                    ],
+                'word_file'            =>
+                    [
+                        'type' => 'text',
+                    ],
+                'published_at'         =>
+                    [
+                        'type'   => 'date',
+                        'format' => 'dateOptionalTime',
+                    ],
+            ],
+        ];
+    }
+
+    /**
      * Gets Master Mapping
      * @return array
      */
     public function getMasterMapping()
     {
-        return [
+        /*return [
             "properties" => [
                 "contract_name"       => [
                     "type"     => "string",
@@ -481,6 +928,1108 @@ class MetadataService extends Service
                     "index" => "not_analyzed",
                 ],
             ],
+        ];*/
+
+        return [
+            'properties' =>
+                [
+                    'annotations_category' =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'annotations_string'   =>
+                        [
+                            'properties' =>
+                                [
+                                    'ar' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'en' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'fr' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                    'ar'                   =>
+                        [
+                            'properties' =>
+                                [
+                                    'category'            =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'company_name'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'contract_name'       =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                    'contract_type'       =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'corporate_grouping'  =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'country_code'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'country_name'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'document_type'       =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                    'file_size'           =>
+                                        [
+                                            'type' => 'integer',
+                                        ],
+                                    'language'            =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'open_contracting_id' =>
+                                        [
+                                            'type' => 'keyword',
+                                        ],
+                                    'resource'            =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                    'resource_raw'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'show_pdf_text'       =>
+                                        [
+                                            'type' => 'integer',
+                                        ],
+                                    'signature_date'      =>
+                                        [
+                                            'type'   => 'date',
+                                            'format' => 'dateOptionalTime',
+                                        ],
+                                    'signature_year'      =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                    'en'                   =>
+                        [
+                            'properties' =>
+                                [
+                                    'category'            =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'company_name'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'contract_name'       =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                    'contract_type'       =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'corporate_grouping'  =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'country_code'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'country_name'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'document_type'       =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                    'file_size'           =>
+                                        [
+                                            'type' => 'integer',
+                                        ],
+                                    'language'            =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'open_contracting_id' =>
+                                        [
+                                            'type' => 'keyword',
+                                        ],
+                                    'resource'            =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                    'resource_raw'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'show_pdf_text'       =>
+                                        [
+                                            'type' => 'integer',
+                                        ],
+                                    'signature_date'      =>
+                                        [
+                                            'type'   => 'date',
+                                            'format' => 'dateOptionalTime',
+                                        ],
+                                    'signature_year'      =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                    'fr'                   =>
+                        [
+                            'properties' =>
+                                [
+                                    'category'            =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'company_name'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'contract_name'       =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                    'contract_type'       =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'corporate_grouping'  =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'country_code'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'country_name'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'document_type'       =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                    'file_size'           =>
+                                        [
+                                            'type' => 'integer',
+                                        ],
+                                    'language'            =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'open_contracting_id' =>
+                                        [
+                                            'type' => 'keyword',
+                                        ],
+                                    'resource'            =>
+                                        [
+                                            'type'     => 'text',
+                                            'fields'   =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                            'analyzer' => 'english',
+                                        ],
+                                    'resource_raw'        =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'show_pdf_text'       =>
+                                        [
+                                            'type' => 'integer',
+                                        ],
+                                    'signature_date'      =>
+                                        [
+                                            'type'   => 'date',
+                                            'format' => 'dateOptionalTime',
+                                        ],
+                                    'signature_year'      =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                    'metadata_string'      =>
+                        [
+                            'properties' =>
+                                [
+                                    'ar' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'en' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'fr' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                    'pdf_text_string'      =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'published_at'         => [
+                        'type'   => 'date',
+                        'format' => 'dateOptionalTime',
+                    ],
+                ],
+        ];
+    }
+
+    /**
+     * Returns Annotation Mapping
+     *
+     * @return array
+     */
+    public function getAnnotationMapping()
+    {
+        return [
+            'properties' =>
+                [
+                    'annotation_id'       =>
+                        [
+                            'type' => 'long',
+                        ],
+                    'annotation_text'     =>
+                        [
+                            'properties' =>
+                                [
+                                    'ar' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'en' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'fr' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                    'article_reference'   =>
+                        [
+                            'properties' =>
+                                [
+                                    'ar' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'en' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'fr' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                    'category'            =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'category_key'        =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'cluster'             =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'contract'            =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'contract_id'         =>
+                        [
+                            'type' => 'integer',
+                        ],
+                    'document_page_no'    =>
+                        [
+                            'type' => 'long',
+                        ],
+                    'id'                  =>
+                        [
+                            'type' => 'long',
+                        ],
+                    'open_contracting_id' =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'page'                =>
+                        [
+                            'type' => 'long',
+                        ],
+                    'page_id'             =>
+                        [
+                            'type' => 'long',
+                        ],
+                    'position'            =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'quote'               =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'ranges'              =>
+                        [
+                            'properties' =>
+                                [
+                                    'end'         =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'endOffset'   =>
+                                        [
+                                            'type' => 'long',
+                                        ],
+                                    'start'       =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'startOffset' =>
+                                        [
+                                            'type' => 'long',
+                                        ],
+                                ],
+                        ],
+                    'shapes'              =>
+                        [
+                            'properties' =>
+                                [
+                                    'geometry' =>
+                                        [
+                                            'properties' =>
+                                                [
+                                                    'height' =>
+                                                        [
+                                                            'type' => 'float',
+                                                        ],
+                                                    'width'  =>
+                                                        [
+                                                            'type' => 'float',
+                                                        ],
+                                                    'x'      =>
+                                                        [
+                                                            'type' => 'float',
+                                                        ],
+                                                    'y'      =>
+                                                        [
+                                                            'type' => 'float',
+                                                        ],
+                                                ],
+                                        ],
+                                    'type'     =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                    'status'              =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'url'                 =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                ],
+        ];
+    }
+
+    /**
+     * Returns PdfText Mapping
+     *
+     * @return array
+     */
+    public function getPdfTextMapping()
+    {
+        return [
+            'properties' =>
+                [
+                    'contract_id'         =>
+                        [
+                            'type' => 'integer',
+                        ],
+                    'metadata'            =>
+                        [
+                            'properties' =>
+                                [
+                                    'category'       =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'contract_name'  =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'country'        =>
+                                        [
+                                            'properties' =>
+                                                [
+                                                    'code' =>
+                                                        [
+                                                            'type'   => 'text',
+                                                            'fields' =>
+                                                                [
+                                                                    'keyword' =>
+                                                                        [
+                                                                            'type'         => 'keyword',
+                                                                            'ignore_above' => 256,
+                                                                        ],
+                                                                ],
+                                                        ],
+                                                    'name' =>
+                                                        [
+                                                            'type'   => 'text',
+                                                            'fields' =>
+                                                                [
+                                                                    'keyword' =>
+                                                                        [
+                                                                            'type'         => 'keyword',
+                                                                            'ignore_above' => 256,
+                                                                        ],
+                                                                ],
+                                                        ],
+                                                ],
+                                        ],
+                                    'file_size'      =>
+                                        [
+                                            'type' => 'long',
+                                        ],
+                                    'file_url'       =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'resource'       =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                    'signature_date' =>
+                                        [
+                                            'type' => 'date',
+                                        ],
+                                    'signature_year' =>
+                                        [
+                                            'type'   => 'text',
+                                            'fields' =>
+                                                [
+                                                    'keyword' =>
+                                                        [
+                                                            'type'         => 'keyword',
+                                                            'ignore_above' => 256,
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                    'open_contracting_id' =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'page_no'             =>
+                        [
+                            'type' => 'long',
+                        ],
+                    'pdf_url'             =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                    'size'                =>
+                        [
+                            'type' => 'long',
+                        ],
+                    'text'                =>
+                        [
+                            'type'   => 'text',
+                            'fields' =>
+                                [
+                                    'keyword' =>
+                                        [
+                                            'type'         => 'keyword',
+                                            'ignore_above' => 256,
+                                        ],
+                                ],
+                        ],
+                ],
         ];
     }
 
@@ -516,46 +2065,7 @@ class MetadataService extends Service
             $params['index'] = $this->index;
             $this->es->indices()->refresh($params);
             $params['type'] = "master";
-            $mapping        = [
-                "properties" => [
-                    "en"                   => $this->getMasterMapping(),
-                    "fr"                   => $this->getMasterMapping(),
-                    "ar"                   => $this->getMasterMapping(),
-                    "annotations_category" => [
-                        "type"  => "string",
-                        "index" => "not_analyzed",
-                    ],
-                    "metadata_string"      => [
-                        "properties" => [
-                            "en" => [
-                                "type" => "string",
-                            ],
-                            "fr" => [
-                                "type" => "string",
-                            ],
-                            "ar" => [
-                                "type" => "string",
-                            ],
-                        ],
-                    ],
-                    "pdf_text_string"      => [
-                        "type" => "string",
-                    ],
-                    "annotations_string"   => [
-                        "properties" => [
-                            "en" => [
-                                "type" => "string",
-                            ],
-                            "fr" => [
-                                "type" => "string",
-                            ],
-                            "ar" => [
-                                "type" => "string",
-                            ],
-                        ],
-                    ],
-                ],
-            ];
+            $mapping        = $this->getMasterMapping();
 
             $params['body']["master"] = $mapping;
             $masterIndex              = $this->es->indices()->putMapping($params);
@@ -578,51 +2088,7 @@ class MetadataService extends Service
             $params['index'] = $this->index;
             $this->es->indices()->refresh($params);
             $params['type'] = "annotations";
-            $mapping        = [
-                "properties" => [
-                    "open_contracting_id" => [
-                        "type"  => "string",
-                        "index" => "not_analyzed",
-                    ],
-                    "annotation_text"     => [
-                        "properties" => [
-                            "en" => [
-                                "type" => "string",
-                            ],
-                            "fr" => [
-                                "type" => "string",
-                            ],
-                            "ar" => [
-                                "type" => "string",
-                            ],
-                        ],
-                    ],
-                    "article_reference"   => [
-                        "properties" => [
-                            "en" => [
-                                "type" => "string",
-                            ],
-                            "fr" => [
-                                "type" => "string",
-                            ],
-                            "ar" => [
-                                "type" => "string",
-                            ],
-                        ],
-                    ],
-                    "category"            =>
-                        [
-                            "type"     => "string",
-                            "analyzer" => "english",
-                            "fields"   => [
-                                "raw" => [
-                                    "type"  => "string",
-                                    "index" => "not_analyzed",
-                                ],
-                            ],
-                        ],
-                ],
-            ];
+            $mapping        = $this->getAnnotationMapping();
 
             $params['body']["annotations"] = $mapping;
             $annotationsIndex              = $this->es->indices()->putMapping($params);
@@ -645,14 +2111,7 @@ class MetadataService extends Service
             $params['index'] = $this->index;
             $this->es->indices()->refresh($params);
             $params['type'] = "pdf_text";
-            $mapping        = [
-                "properties" => [
-                    "open_contracting_id" => [
-                        "type"  => "string",
-                        "index" => "not_analyzed",
-                    ],
-                ],
-            ];
+            $mapping        = $this->getPdfTextMapping();
 
             $params['body']["pdf_text"] = $mapping;
             $pdfText                    = $this->es->indices()->putMapping($params);
@@ -776,7 +2235,12 @@ class MetadataService extends Service
                     ],
                 "signature_year"       =>
                     [
-                        "type" => "string",
+                        "type"   => "text",
+                        "fields" => [
+                            "raw" => [
+                                "type" => "keyword",
+                            ],
+                        ],
                     ],
                 "translation_parent"   =>
                     [
@@ -899,3 +2363,4 @@ class MetadataService extends Service
             ];
     }
 }
+
