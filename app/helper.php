@@ -75,3 +75,20 @@ function logger($message = null)
 
     return $log->info($message);
 }
+
+/**
+ * Validates datetime
+ * 3069fa7964c7516d3c326bc86a9c487cd521e514
+ * b8948467a237aa000b76ac39defa97c6dc986ad1
+ *
+ * @param        $date
+ * @param string $format
+ *
+ * @return bool
+ */
+function validateDate($date, $format = 'Y-m-d H:i:s')
+{
+    $d = DateTime::createFromFormat($format, $date);
+    // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+    return $d && $d->format($format) === $date;
+}

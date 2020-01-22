@@ -40,11 +40,8 @@ class ApiController extends BaseController
                 'updated_at'           => $this->request->request->get('updated_at'),
                 'total_pages'          => $this->request->request->get('total_pages'),
                 'supporting_contracts' => $this->request->request->get('supporting_contracts'),
+                'published_at'         => $this->request->request->get('published_at'),
             ];
-
-            if (!empty($this->request->request->get('published_at'))) {
-                $data['published_at'] = $this->request->request->get('published_at');
-            }
 
             if ($response = $metadata->index($data)) {
                 return $this->json(['result' => $response]);
@@ -178,6 +175,30 @@ class ApiController extends BaseController
 
             return $this->json(['result' => 'failed']);
         } catch (\Exception $e) {
+            return $this->json(['result' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Updates published_at in elastic search index
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function updatePublishedAtIndex()
+    {
+        try {
+            $params           = $this->request->request->all();
+            $recent_contracts = $params['recent_contracts'];
+            file_put_contents('published_at_bk.json', $recent_contracts);
+            $recent_contracts     = json_decode($recent_contracts);
+            $metadata             = new MetadataService();
+            $updated_published_at = $metadata->updatePublishedAt($recent_contracts);
+
+            file_put_contents('updated_published_at.json', json_encode($updated_published_at));
+
+            return $this->json(['result' => 'Update executed']);
+        } catch (\Exception $e) {
+            file_put_contents('published_at_error.log', $e->getMessage());
             return $this->json(['result' => $e->getMessage()]);
         }
     }
