@@ -21,7 +21,6 @@ class MetadataService extends Service
     {
         parent::__construct();
         $this->checkIndex();
-
     }
 
     /**
@@ -34,13 +33,19 @@ class MetadataService extends Service
     public function index($metaData)
     {
         try {
-            $params       = $this->getIndexType();
-            $params['id'] = $metaData['id'];
-            $document     = $this->es->exists($params);
-            $metadata     = json_decode($metaData['metadata']);
-            $createdBy    = json_decode($metaData['created_by']);
-            $updatedBy    = json_decode($metaData['updated_by']);
-            $data         = [
+            $params                 = $this->getIndexType();
+            $params['id']           = $metaData['id'];
+            $document               = $this->es->exists($params);
+            $metadata               = json_decode($metaData['metadata']);
+            $createdBy              = json_decode($metaData['created_by']);
+            $updatedBy              = json_decode($metaData['updated_by']);
+            $published_at           = $metaData['published_at'];
+            $published_at           = !empty($published_at) ? date('Y-m-d', strtotime($published_at)).'T'.date(
+                    'H:i:s',
+                    strtotime($published_at)
+                ) : '';
+            $metadata->published_at = $published_at;
+            $data                   = [
                 'contract_id'          => $metaData['id'],
                 'en'                   => $metadata->en,
                 'fr'                   => $metadata->fr,
@@ -59,15 +64,8 @@ class MetadataService extends Service
                         'H:i:s',
                         strtotime($metaData['updated_at'])
                     ),
+                'published_at'         => $published_at,
             ];
-
-            if (isset($metaData['published_at'])) {
-                $data['published_at'] = date('Y-m-d', strtotime($metaData['published_at'])).'T'.date(
-                        'H:i:s',
-                        strtotime($metaData['published_at'])
-                    );
-            }
-
             if ($document) {
                 $params['body']['doc'] = $data;
 
@@ -194,6 +192,7 @@ class MetadataService extends Service
                 "pdf_text_string"      => [],
                 "annotations_category" => [],
                 "annotations_string"   => [],
+                "published_at"         => $metadata->published_at,
             ];
 
             if ($document) {
@@ -206,6 +205,7 @@ class MetadataService extends Service
                         "fr" => $this->getMetadataString($this->removeURL($metadata->fr)),
                         "ar" => $this->getMetadataString($this->removeURL($metadata->ar)),
                     ],
+                    "published_at"    => $metadata->published_at,
                 ];
 
                 $response = $this->es->update($params);
@@ -844,11 +844,6 @@ class MetadataService extends Service
                 'word_file'            =>
                     [
                         'type' => 'text',
-                    ],
-                'published_at'         =>
-                    [
-                        'type'   => 'date',
-                        'format' => 'dateOptionalTime',
                     ],
             ],
         ];
@@ -2361,6 +2356,44 @@ class MetadataService extends Service
                             ],
                     ],
             ];
+    }
+
+    /**
+     * Updates published_at in elastic search index
+     *
+     * @param $recent_contracts
+     *
+     * @return array
+     */
+    public function updatePublishedAt($recent_contracts)
+    {
+        $response = array();
+
+        foreach ($recent_contracts as $contract_id => $published_at) {
+            $published_at                = date('Y-m-d', strtotime($published_at)).'T'.date(
+                    'H:i:s',
+                    strtotime
+                    (
+                        $published_at
+                    )
+                );
+            $master_param['index']       = $this->index;
+            $master_param['type']        = 'master';
+            $master_param['id']          = $contract_id;
+            $master_param['body']['doc'] = ['published_at' => $published_at];
+            $master_res                  = $this->es->update($master_param);
+            array_push($response, $master_res);
+
+            $metadata_param['index']       = $this->index;
+            $metadata_param['type']        = 'metadata';
+            $metadata_param['id']          = $contract_id;
+            $metadata_param['body']['doc'] = ['published_at' => $published_at];
+            $metadata_res                  = $this->es->update($metadata_param);
+            array_push($response, $metadata_res);
+        }
+
+        return $response;
+
     }
 }
 
