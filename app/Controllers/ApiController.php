@@ -1,4 +1,6 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Services\AnnotationsService;
 use App\Services\DeleteContractService;
@@ -48,7 +50,6 @@ class ApiController extends BaseController
             }
 
             return $this->json(['result' => 'failed']);
-
         } catch (\Exception $e) {
             return $this->json(['result' => $e->getMessage()]);
         }
@@ -69,7 +70,6 @@ class ApiController extends BaseController
             }
 
             return $this->json(['result' => 'failed']);
-
         } catch (\Exception $e) {
             return $this->json(['result' => $e->getMessage()]);
         }
@@ -189,17 +189,38 @@ class ApiController extends BaseController
         try {
             $params           = $this->request->request->all();
             $recent_contracts = $params['recent_contracts'];
-            file_put_contents('published_at_bk.json', $recent_contracts);
+
+            $this->appendLog('published_at_bk.json', $recent_contracts);
+
             $recent_contracts     = json_decode($recent_contracts);
             $metadata             = new MetadataService();
             $updated_published_at = $metadata->updatePublishedAt($recent_contracts);
 
-            file_put_contents('updated_published_at.json', json_encode($updated_published_at));
-
+            $this->appendLog('updated_published_at.json', $updated_published_at);
+            
             return $this->json(['result' => 'Update executed']);
         } catch (\Exception $e) {
             file_put_contents('published_at_error.log', $e->getMessage());
             return $this->json(['result' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Append log file with timestamp in a json file
+     *
+     * @return void
+     */
+    private function appendLog($fileName, $newLog)
+    {
+        $log = file_get_contents($fileName);
+        if ($log) {
+            $log = json_decode($log, true);
+        } else {
+            $log = [];
+        }
+
+        $log[date('Y-m-d H:i:s')] = $newLog;
+
+        file_put_contents($fileName, json_encode($log));
     }
 }
