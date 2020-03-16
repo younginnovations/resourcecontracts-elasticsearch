@@ -9,3 +9,4 @@ $router->addRoute('POST', '/contract/delete/metadata', 'App\Controllers\ApiContr
 $router->addRoute('POST', '/contract/delete/text', 'App\Controllers\ApiController::deleteContractText');
 $router->addRoute('POST', '/contract/delete/annotation', 'App\Controllers\ApiController::deleteContractAnnotation');
 $router->addRoute('POST', '/contract/published_at/update', 'App\Controllers\ApiController::updatePublishedAtIndex');
+$router->addRoute('POST', '/contract/annotation_category/community_consultation/update', 'App\Controllers\ApiController::updateAnnotationCategory');
