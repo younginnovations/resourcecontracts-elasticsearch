@@ -1,4 +1,6 @@
-<?php namespace App\Services;
+<?php
+
+namespace App\Services;
 
 /**
  * Class AnnotationsService
@@ -163,12 +165,12 @@ class AnnotationsService extends Service
 
         foreach ($annotations as $annotation) {
             $text = isset($annotation['annotation_text'][$lang]) ? $annotation['annotation_text'][$lang] : "";
-            $data .= ' '.$text;
+            $data .= ' ' . $text;
         }
 
         foreach ($annotations as $annotation) {
             $text = isset($annotation['category']) ? $annotation['category'] : "";
-            $data .= ' '.$text;
+            $data .= ' ' . $text;
         }
 
         $data = trim($data);
@@ -195,5 +197,37 @@ class AnnotationsService extends Service
         $data = $this->removeKeys($data);
 
         return $data;
+    }
+
+    /**
+     * Updates annotation category name "Community consultation " to 
+     * "Community consultation" in elastic search
+     *
+     * @param $contracts
+     *
+     * @return array
+     */
+    public function updateAnnotationCategory($contracts)
+    {
+        $response = [];
+
+        foreach($contracts as $id => $contract) {
+            $params = [];
+            $params['index']      = $this->index;
+            $params['type']       = "master";
+            $params['id']         = $id;
+            $document             = $this->es->exists($params);
+            $annotations_category = $this->getAnnotationsCategory($contract);
+            $annotations_category = $annotations_category == '' ? [] : $annotations_category;
+        
+            if ($document) {
+                $params['body']['doc'] = [
+                    "annotations_category" => $annotations_category,
+                ];
+                $response[]              = $this->es->update($params);
+            }
+        }
+
+        return $response;
     }
 }

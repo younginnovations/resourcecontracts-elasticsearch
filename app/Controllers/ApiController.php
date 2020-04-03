@@ -212,7 +212,7 @@ class ApiController extends BaseController
      */
     private function appendLog($fileName, $newLog)
     {
-        $log = file_get_contents($fileName);
+        $log = @file_get_contents($fileName);
         if ($log) {
             $log = json_decode($log, true);
         } else {
@@ -222,5 +222,33 @@ class ApiController extends BaseController
         $log[date('Y-m-d H:i:s')] = $newLog;
 
         file_put_contents($fileName, json_encode($log));
+    }
+
+    /**
+     * Updates annotation category name "Community consultation " to 
+     * "Community consultation" in elastic search
+     * 
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function updateAnnotationCategory()
+    {
+        try {
+            $params           = $this->request->request->all();
+            $annotations = $params['annotations'];
+
+
+            $annotations                  = json_decode($annotations, true);
+            $this->appendLog('annotation_category_bk.json', $annotations);
+
+            $annotationData               = new AnnotationsService();
+            $updated_annotation_category  = $annotationData->updateAnnotationCategory($annotations);
+
+            $this->appendLog('updated_annotation_category.json', $updated_annotation_category);
+            
+            return $this->json(['result' => 'Update executed']);
+        } catch (\Exception $e) {
+            file_put_contents('annotation_category_error.log', $e->getMessage(), FILE_APPEND);
+            return $this->json(['result' => $e->getMessage()]);
+        }
     }
 }
