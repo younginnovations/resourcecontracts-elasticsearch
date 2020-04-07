@@ -197,16 +197,20 @@ class ApiController extends BaseController
             $updated_published_at = $metadata->updatePublishedAt($recent_contracts);
 
             $this->appendLog('updated_published_at.json', $updated_published_at);
-            
+
             return $this->json(['result' => 'Update executed']);
         } catch (\Exception $e) {
             file_put_contents('published_at_error.log', $e->getMessage());
+
             return $this->json(['result' => $e->getMessage()]);
         }
     }
 
     /**
      * Append log file with timestamp in a json file
+     *
+     * @param $fileName
+     * @param $newLog
      *
      * @return void
      */
@@ -225,30 +229,86 @@ class ApiController extends BaseController
     }
 
     /**
-     * Updates annotation category name "Community consultation " to 
+     * Updates annotation category name "Community consultation " to
      * "Community consultation" in elastic search
-     * 
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function updateAnnotationCategory()
     {
         try {
-            $params           = $this->request->request->all();
+            $params      = $this->request->request->all();
             $annotations = $params['annotations'];
-
-
-            $annotations                  = json_decode($annotations, true);
+            $annotations = json_decode($annotations, true);
             $this->appendLog('annotation_category_bk.json', $annotations);
 
-            $annotationData               = new AnnotationsService();
-            $updated_annotation_category  = $annotationData->updateAnnotationCategory($annotations);
+            $annotationData              = new AnnotationsService();
+            $updated_annotation_category = $annotationData->updateAnnotationCategory($annotations);
 
             $this->appendLog('updated_annotation_category.json', $updated_annotation_category);
-            
+
             return $this->json(['result' => 'Update executed']);
         } catch (\Exception $e) {
             file_put_contents('annotation_category_error.log', $e->getMessage(), FILE_APPEND);
+
             return $this->json(['result' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Updates the annotation cluster
+     * 
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function updateAnnotationCluster()
+    {
+        try {
+            $annotationData = new AnnotationsService();
+            $docs           = $annotationData->getAnnotationDocs('size-of-concession-area', 'Legal Rules');
+            $annotations    = $docs['hits']['hits'];
+            $updated_docs   = [];
+
+            foreach ($annotations as $annotation) {
+                $annotation_service = new AnnotationsService();
+                $updated_docs[]     = $annotation_service->updateAnnotationCluster($annotation['_id'], 'General');
+            }
+            $this->appendLog('annotation_cluster_bk.json', $annotations);
+            $this->appendLog('annotation_cluster_updated_bk.json', $updated_docs);
+
+            return $this->json(['result' => 'Update executed']);
+        } catch (\Exception $e) {
+            file_put_contents('annotation_cluster_error.log', $e, FILE_APPEND);
+
+            $content = json_encode(['result' => $e->getMessage()], JSON_PRETTY_PRINT);
+
+            return $this->response->create($content, 400, ['Content-Type: application/json']);
+        }
+    }
+
+    /**
+     * Restores updated annotation
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function restoreAnnotationCluster()
+    {
+        try {
+            $params  = $this->request->request->all();
+            $bk_docs = json_decode(file_get_contents('annotation_cluster_bk.json'), true);
+            $docs    = $bk_docs[$params['key']];
+
+            foreach ($docs as $doc) {
+                $annotationData = new AnnotationsService();
+                $annotationData->updateAnnotationCluster($doc['_id'], $doc['_source']['cluster']);
+            }
+
+            return $this->json(['result' => 'Restore executed']);
+        } catch (\Exception $e) {
+            file_put_contents('annotation_cluster_error.log', $e->getMessage(), FILE_APPEND);
+
+            $content = json_encode(['result' => $e->getMessage()], JSON_PRETTY_PRINT);
+
+            return $this->response->create($content, 400, ['Content-Type: application/json']);
         }
     }
 }
