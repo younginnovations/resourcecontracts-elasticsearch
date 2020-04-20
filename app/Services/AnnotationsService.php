@@ -165,12 +165,12 @@ class AnnotationsService extends Service
 
         foreach ($annotations as $annotation) {
             $text = isset($annotation['annotation_text'][$lang]) ? $annotation['annotation_text'][$lang] : "";
-            $data .= ' ' . $text;
+            $data .= ' '.$text;
         }
 
         foreach ($annotations as $annotation) {
             $text = isset($annotation['category']) ? $annotation['category'] : "";
-            $data .= ' ' . $text;
+            $data .= ' '.$text;
         }
 
         $data = trim($data);
@@ -200,7 +200,7 @@ class AnnotationsService extends Service
     }
 
     /**
-     * Updates annotation category name "Community consultation " to 
+     * Updates annotation category name "Community consultation " to
      * "Community consultation" in elastic search
      *
      * @param $contracts
@@ -211,23 +211,73 @@ class AnnotationsService extends Service
     {
         $response = [];
 
-        foreach($contracts as $id => $contract) {
-            $params = [];
+        foreach ($contracts as $id => $contract) {
+            $params               = [];
             $params['index']      = $this->index;
             $params['type']       = "master";
             $params['id']         = $id;
             $document             = $this->es->exists($params);
             $annotations_category = $this->getAnnotationsCategory($contract);
             $annotations_category = $annotations_category == '' ? [] : $annotations_category;
-        
+
             if ($document) {
                 $params['body']['doc'] = [
                     "annotations_category" => $annotations_category,
                 ];
-                $response[]              = $this->es->update($params);
+                $response[]            = $this->es->update($params);
             }
         }
 
         return $response;
+    }
+
+    /**
+     * Returns data
+     *
+     * @param $category
+     * @param $cluster
+     *
+     * @return array
+     */
+    public function getAnnotationDocs($category, $cluster)
+    {
+        $params                                  = [];
+        $params['index']                         = $this->index;
+        $params['type']                          = "annotations";
+        $params['body']['query']['bool']['must'][] = [
+            "match" => [
+                "category_key.keyword" => $category,
+            ],
+        ];
+        $params['body']['query']['bool']['must'][] = [
+            "match" => [
+                "cluster"      => $cluster,
+            ],
+        ];
+
+        $params['body']['from']=0;
+        $params['body']['size']=1000;
+
+        return $this->es->search($params);
+    }
+
+    /**
+     * Updates annotation cluster
+     *
+     * @param $annotation_id
+     * @param $cluster
+     *
+     * @return array
+     */
+    public function updateAnnotationCluster($annotation_id, $cluster)
+    {
+        $params = [
+            'index' => $this->index,
+            'type'  => 'annotations',
+            'id'    => $annotation_id,
+            'body'  => ['doc' => ["cluster" => $cluster]],
+        ];
+
+        return $this->es->update($params);
     }
 }

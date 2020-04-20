@@ -10,3 +10,5 @@ $router->addRoute('POST', '/contract/delete/text', 'App\Controllers\ApiControlle
 $router->addRoute('POST', '/contract/delete/annotation', 'App\Controllers\ApiController::deleteContractAnnotation');
 $router->addRoute('POST', '/contract/published_at/update', 'App\Controllers\ApiController::updatePublishedAtIndex');
 $router->addRoute('POST', '/contract/annotation_category/community_consultation/update', 'App\Controllers\ApiController::updateAnnotationCategory');
+$router->addRoute('POST', '/contract/cluster/update', 'App\Controllers\ApiController::updateAnnotationCluster');
+$router->addRoute('POST', '/contract/cluster/restore', 'App\Controllers\ApiController::restoreAnnotationCluster');
