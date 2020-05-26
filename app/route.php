@@ -12,3 +12,4 @@ $router->addRoute('POST', '/contract/published_at/update', 'App\Controllers\ApiC
 $router->addRoute('POST', '/contract/annotation_category/community_consultation/update', 'App\Controllers\ApiController::updateAnnotationCategory');
 $router->addRoute('POST', '/contract/cluster/update', 'App\Controllers\ApiController::updateAnnotationCluster');
 $router->addRoute('POST', '/contract/cluster/restore', 'App\Controllers\ApiController::restoreAnnotationCluster');
+$router->addRoute('POST', '/contract/supporting-doc/update', 'App\Controllers\ApiController::updateSupportingDocIndex');

@@ -41,7 +41,8 @@ class ApiController extends BaseController
                 'created_at'           => $this->request->request->get('created_at'),
                 'updated_at'           => $this->request->request->get('updated_at'),
                 'total_pages'          => $this->request->request->get('total_pages'),
-                'supporting_contracts' => $this->request->request->get('supporting_contracts'),
+                'supporting_contracts' => json_decode($this->request->request->get('supporting_contracts')),
+                'parent_contract'      => json_decode($this->request->request->get('parent_contract')),
                 'published_at'         => $this->request->request->get('published_at'),
             ];
 
@@ -257,7 +258,7 @@ class ApiController extends BaseController
 
     /**
      * Updates the annotation cluster
-     * 
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function updateAnnotationCluster()
@@ -309,6 +310,57 @@ class ApiController extends BaseController
             $content = json_encode(['result' => $e->getMessage()], JSON_PRETTY_PRINT);
 
             return $this->response->create($content, 400, ['Content-Type: application/json']);
+        }
+    }
+
+    /**
+     * Re indexes the master
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function updateSupportingDocIndex()
+    {
+        try {
+            file_put_contents('add_to_master_track.json',"Indexing called".PHP_EOL, FILE_APPEND);
+            $params   = $this->request->request->all();
+            $metadata = new MetadataService();
+            file_put_contents('add_to_master_track.json',json_encode($params).PHP_EOL, FILE_APPEND);
+
+            if (array_key_exists('get_master_pages', $params)) {
+                $master_count = $metadata->getMasterPages();
+
+                return $this->json(['result' => $master_count, 'status' => true]);
+            } elseif (array_key_exists('add_to_master', $params)) {
+                $page          = $params['add_to_master'];
+                file_put_contents('add_to_master_track.json',"started $page ".PHP_EOL, FILE_APPEND);
+                $master_key_bk = $metadata->addMasterDocKey($page);
+
+                $this->appendLog("master_key_bk_$page.json", $master_key_bk);
+            } elseif (array_key_exists('parent_child_contracts', $params)) {
+                $parent_child_contracts = $params['parent_child_contracts'];
+
+                $this->appendLog('parent_child_contract_bk.json', $parent_child_contracts);
+
+                $parent_child_contracts   = json_decode($parent_child_contracts);
+                $updated_parent_contracts = $metadata->updateParent($parent_child_contracts);
+
+                $this->appendLog('updated_parent_child_contract_bk.json', $updated_parent_contracts);
+            } elseif (array_key_exists('child_parent_contracts', $params)) {
+                $child_parent_contracts = $params['child_parent_contracts'];
+
+                $this->appendLog('child_parent_contract_bk.json', $child_parent_contracts);
+
+                $child_parent_contracts  = json_decode($child_parent_contracts);
+                $updated_child_contracts = $metadata->updateChild($child_parent_contracts);
+
+                $this->appendLog('updated_child_parent_contract_bk.json', $updated_child_contracts);
+            }
+
+            return $this->json(['result' => 'Update executed', 'status' => true]);
+        } catch (\Exception $e) {
+            file_put_contents('supporting_doc_error.log', $e->getMessage());
+
+            return $this->json(['result' => $e->getMessage(), 'status' => false]);
         }
     }
 }
