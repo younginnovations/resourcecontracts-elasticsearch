@@ -2448,7 +2448,6 @@ class MetadataService extends Service
             $master_param['body']['sort']['en.open_contracting_id']['order'] = 'asc';
 
             file_put_contents('add_to_master_track.json', 'master-param-pass'.PHP_EOL, FILE_APPEND);
-
             $results                                                         = $this->es->search($master_param);
             $results                                                         = $results['hits']['hits'];
 
