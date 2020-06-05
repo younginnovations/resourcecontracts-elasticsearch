@@ -33,24 +33,31 @@ class MetadataService extends Service
     public function index($metaData)
     {
         try {
-            $params                 = $this->getIndexType();
-            $params['id']           = $metaData['id'];
-            $document               = $this->es->exists($params);
-            $metadata               = json_decode($metaData['metadata']);
-            $createdBy              = json_decode($metaData['created_by']);
-            $updatedBy              = json_decode($metaData['updated_by']);
-            $published_at           = $metaData['published_at'];
-            $published_at           = (!empty($published_at) && validateDate($published_at)) ? date('Y-m-d', strtotime
-                ($published_at)).'T'.date(
+            $params                                = $this->getIndexType();
+            $params['id']                          = $metaData['id'];
+            $document                              = $this->es->exists($params);
+            $master_metadata                       = json_decode($metaData['metadata']);
+            $createdBy                             = json_decode($metaData['created_by']);
+            $updatedBy                             = json_decode($metaData['updated_by']);
+            $published_at                          = $metaData['published_at'];
+            $published_at                          = (!empty($published_at) && validateDate($published_at)) ? date(
+                    'Y-m-d',
+                    strtotime
+                    (
+                        $published_at
+                    )
+                ).'T'.date(
                     'H:i:s',
                     strtotime($published_at)
                 ) : '';
-            $metadata->published_at = $published_at;
-            $data                   = [
+            $master_metadata->published_at         = $published_at;
+            $master_metadata->supporting_contracts = $metaData['supporting_contracts'];
+            $master_metadata->parent_contract      = $metaData['parent_contract'];
+            $data                                  = [
                 'contract_id'          => $metaData['id'],
-                'en'                   => $metadata->en,
-                'fr'                   => $metadata->fr,
-                'ar'                   => $metadata->ar,
+                'en'                   => $master_metadata->en,
+                'fr'                   => $master_metadata->fr,
+                'ar'                   => $master_metadata->ar,
                 'updated_user_name'    => $updatedBy->name,
                 'total_pages'          => $metaData['total_pages'],
                 'updated_user_email'   => $updatedBy->email,
@@ -71,9 +78,9 @@ class MetadataService extends Service
                 $params['body']['doc'] = $data;
 
                 $response    = $this->es->update($params);
-                $uText       = $this->updateTextOCID($params['id'], $metadata->en->open_contracting_id);
-                $uAnnotation = $this->updateAnnotationOCID($params['id'], $metadata->en->open_contracting_id);
-                $master      = $this->insertIntoMaster($metaData['id'], $metadata);
+                $uText       = $this->updateTextOCID($params['id'], $master_metadata->en->open_contracting_id);
+                $uAnnotation = $this->updateAnnotationOCID($params['id'], $master_metadata->en->open_contracting_id);
+                $master      = $this->insertIntoMaster($metaData['id'], $master_metadata);
                 logger()->info("Metadata Index updated", array_merge($response, $master, $uText, $uAnnotation));
 
                 return array_merge($response, $master, $uText, $uAnnotation);
@@ -81,7 +88,7 @@ class MetadataService extends Service
 
             $params['body'] = $data;
             $response       = $this->es->index($params);
-            $master         = $this->insertIntoMaster($metaData['id'], $metadata);
+            $master         = $this->insertIntoMaster($metaData['id'], $master_metadata);
 
             logger()->info("Metadata Index created", $response);
 
@@ -182,41 +189,45 @@ class MetadataService extends Service
             $params['id']    = $contractId;
             $document        = $this->es->exists($params);
             $body            = [
-                "en"                   => $this->filterMetadata($metadata->en),
-                "fr"                   => $this->filterMetadata($metadata->fr),
-                "ar"                   => $this->filterMetadata($metadata->ar),
-                "metadata_string"      => [
+                "en"                     => $this->filterMetadata($metadata->en),
+                "fr"                     => $this->filterMetadata($metadata->fr),
+                "ar"                     => $this->filterMetadata($metadata->ar),
+                "metadata_string"        => [
                     "en" => $this->getMetadataString($this->removeURL($metadata->en)),
                     "fr" => $this->getMetadataString($this->removeURL($metadata->fr)),
                     "ar" => $this->getMetadataString($this->removeURL($metadata->ar)),
                 ],
-                "pdf_text_string"      => [],
-                "annotations_category" => [],
-                "annotations_string"   => [],
-                "published_at"         => $metadata->published_at,
+                "pdf_text_string"        => [],
+                "annotations_category"   => [],
+                "annotations_string"     => [],
+                "published_at"           => $metadata->published_at,
+                "is_supporting_document" => (!empty($metadata->parent_contract) && empty($metadata->supporting_contracts)) ? "1" : "0",
+                "supporting_contracts"   => $metadata->supporting_contracts,
+                "parent_contract"        => $metadata->parent_contract,
             ];
 
             if ($document) {
                 $params['body']['doc'] = [
-                    "en"              => $this->filterMetadata($metadata->en),
-                    "fr"              => $this->filterMetadata($metadata->fr),
-                    "ar"              => $this->filterMetadata($metadata->ar),
-                    "metadata_string" => [
+                    "en"                     => $this->filterMetadata($metadata->en),
+                    "fr"                     => $this->filterMetadata($metadata->fr),
+                    "ar"                     => $this->filterMetadata($metadata->ar),
+                    "metadata_string"        => [
                         "en" => $this->getMetadataString($this->removeURL($metadata->en)),
                         "fr" => $this->getMetadataString($this->removeURL($metadata->fr)),
                         "ar" => $this->getMetadataString($this->removeURL($metadata->ar)),
                     ],
-                    "published_at"    => $metadata->published_at,
+                    "published_at"           => $metadata->published_at,
+                    "is_supporting_document" => (!empty($metadata->parent_contract) && empty($metadata->supporting_contracts)) ? "1" : "0",
+                    "supporting_contracts"   => $metadata->supporting_contracts,
+                    "parent_contract"        => $metadata->parent_contract,
                 ];
 
-                $response = $this->es->update($params);
 
-                return $response;
+                return $this->es->update($params);
             }
             $params['body'] = $body;
-            $response       = $this->es->index($params);
 
-            return $response;
+            return $this->es->index($params);
         } catch (Exception $e) {
             logger()->error("Error while indexing Metadata in master", [$e->getMessage()]);
 
@@ -2395,6 +2406,150 @@ class MetadataService extends Service
 
         return $response;
 
+    }
+
+    /**
+     * Returns page numbers of master doc
+     *
+     * @return false|float
+     */
+    public function getMasterPages()
+    {
+        $master_param          = [];
+        $master_param['index'] = $this->index;
+        $master_param['type']  = 'master';
+        $results               = $this->es->count($master_param);
+        $count                 = (int) $results['count'];
+        $page_size             = 1000;
+
+        return ceil($count / $page_size);
+    }
+
+    /**
+     * Adds is_supporting_document, supporting_contracts and parent_contract keys to master
+     *
+     * @param $page
+     *
+     * @return array[]
+     */
+    public function addMasterDocKey($page)
+    {
+        try {
+            $page_size                                                       = 1000;
+            $from                                                            = ($page == 1) ? 0 : (($page - 1) * $page_size);
+            $master_ids                                                      = [];
+            $res                                                             = [];
+            $master_param                                                    = [];
+            $master_param['index']                                           = $this->index;
+            $master_param['type']                                            = 'master';
+            $master_param['from']                                            = $from;
+            $master_param['size']                                            = $page_size;
+            $master_param['body']['_source']                                 = ['en.open_contracting_id'];
+            $master_param['body']['sort']['en.open_contracting_id']['order'] = 'asc';
+
+            file_put_contents('add_to_master_track.json', 'master-param-pass'.PHP_EOL, FILE_APPEND);
+
+            $results                                                         = $this->es->search($master_param);
+            $results                                                         = $results['hits']['hits'];
+
+            file_put_contents('add_to_master_track.json', 'results-pass'.PHP_EOL, FILE_APPEND);
+
+            foreach ($results as $result) {
+                $master_ids[]                = $result['_id'];
+                $master_param                = [];
+                $master_param['index']       = $this->index;
+                $master_param['type']        = 'master';
+                $master_param['id']          = $result['_id'];
+                $master_param['body']['doc'] = [
+                    'is_supporting_document' => '0',
+                    'supporting_contracts'   => null,
+                    'parent_contract'        => null,
+                ];
+                $res[]                       = $this->es->update($master_param);
+
+            }
+            file_put_contents('add_to_master_track.json','update-pass'.PHP_EOL, FILE_APPEND);
+
+            return [
+                'count'               => [
+                    'master_id_count'           => count($master_ids),
+                    'updated_master_docs_count' => count($res),
+                ],
+                'master_ids'          => $master_ids,
+                'updated_master_docs' => $res,
+            ];
+        } catch (\Exception $e) {
+            file_put_contents('master_key_error.log', $e->getMessage());
+        }
+    }
+
+    /**
+     * Updates is_supporting_document, supporting_contracts in master for parent contract
+     *
+     * @param $parent_contracts
+     *
+     * @return array
+     */
+    public function updateParent($parent_contracts)
+    {
+        $response = array();
+
+        foreach ($parent_contracts as $parent_id => $child_contracts) {
+            $master_param          = [];
+            $master_param['index'] = $this->index;
+            $master_param['type']  = 'master';
+            $master_param['id']    = $parent_id;
+
+            if ($this->es->exists($master_param)) {
+                $master_param                = [];
+                $master_param['index']       = $this->index;
+                $master_param['type']        = 'master';
+                $master_param['id']          = $parent_id;
+                $master_param['body']['doc'] = [
+                    'is_supporting_document' => '0',
+                    'supporting_contracts'   => $child_contracts,
+                ];
+                $master_res                  = $this->es->update($master_param);
+                array_push($response, $master_res);
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * Updates is_supporting_document, parent_contract in master for child contract
+     *
+     * @param $child_contracts
+     *
+     * @return array
+     */
+    public function updateChild($child_contracts)
+    {
+        $response = array();
+
+        foreach ($child_contracts as $child_id => $parent_contract) {
+            $master_param          = [];
+            $master_param['index'] = $this->index;
+            $master_param['type']  = 'master';
+            $master_param['id']    = $child_id;
+
+            if ($this->es->exists($master_param)) {
+                $master_param                = [];
+                $master_param['index']       = $this->index;
+                $master_param['type']        = 'master';
+                $master_param['id']          = $child_id;
+                $master_param['body']['doc'] = [
+                    'is_supporting_document' => '1',
+                    'parent_contract'        => $parent_contract,
+                ];
+                $master_res                  = $this->es->update($master_param);
+                array_push($response, $master_res);
+            }
+
+        }
+
+        return $response;
     }
 }
 
