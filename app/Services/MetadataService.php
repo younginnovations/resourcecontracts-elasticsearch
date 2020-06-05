@@ -2511,6 +2511,7 @@ class MetadataService extends Service
                 array_push($response, $master_res);
             }
         }
+        file_put_contents('add_to_master_track.json',"finished parent-child-indexing ".PHP_EOL, FILE_APPEND);
 
         return $response;
     }
@@ -2546,6 +2547,7 @@ class MetadataService extends Service
             }
 
         }
+        file_put_contents('add_to_master_track.json',"finished child-parent-indexing ".PHP_EOL, FILE_APPEND);
 
         return $response;
     }
