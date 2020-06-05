@@ -337,6 +337,7 @@ class ApiController extends BaseController
 
                 $this->appendLog("master_key_bk_$page.json", $master_key_bk);
             } elseif (array_key_exists('parent_child_contracts', $params)) {
+                file_put_contents('add_to_master_track.json',"started parent-child-indexing ".PHP_EOL, FILE_APPEND);
                 $parent_child_contracts = $params['parent_child_contracts'];
 
                 $this->appendLog('parent_child_contract_bk.json', $parent_child_contracts);
@@ -346,6 +347,7 @@ class ApiController extends BaseController
 
                 $this->appendLog('updated_parent_child_contract_bk.json', $updated_parent_contracts);
             } elseif (array_key_exists('child_parent_contracts', $params)) {
+                file_put_contents('add_to_master_track.json',"started child-parent-indexing ".PHP_EOL, FILE_APPEND);
                 $child_parent_contracts = $params['child_parent_contracts'];
 
                 $this->appendLog('child_parent_contract_bk.json', $child_parent_contracts);
