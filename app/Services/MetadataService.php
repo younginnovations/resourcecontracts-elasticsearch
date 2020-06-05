@@ -2466,7 +2466,6 @@ class MetadataService extends Service
                     'parent_contract'        => null,
                 ];
                 $res[]                       = $this->es->update($master_param);
-
             }
             file_put_contents('add_to_master_track.json','update-pass'.PHP_EOL, FILE_APPEND);
 
