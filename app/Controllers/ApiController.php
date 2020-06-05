@@ -321,7 +321,7 @@ class ApiController extends BaseController
     public function updateSupportingDocIndex()
     {
         try {
-            file_put_contents('add_to_master_track.json',"Indexing called".PHP_EOL, FILE_APPEND);
+            file_put_contents('add_to_master_track.json',"Indexing called with ES refreshed".PHP_EOL, FILE_APPEND);
             $params   = $this->request->request->all();
             $metadata = new MetadataService();
             file_put_contents('add_to_master_track.json',json_encode($params).PHP_EOL, FILE_APPEND);
