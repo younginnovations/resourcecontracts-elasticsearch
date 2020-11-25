@@ -19,6 +19,13 @@ The app can be run with the command below:
 
 ## Setup Elasticsearch
 
+Elasticsearch indices are automatically created when the first API request is processed if they do not exist already. Indices will be prefixed with the string passed as the `INDICES_PREFIX` environment variable.
+
+To trigger indices creation manually, run the `create-indices.php` command in the root of the project:
+```shell script
+php create-indices.php
+```
+
 ### For Linux
 
 * Download Elasticsearch- `wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.12.deb`
