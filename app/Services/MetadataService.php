@@ -9,12 +9,6 @@ use Exception;
 class MetadataService extends Service
 {
     /**
-     *  ES Type
-     * @var string
-     */
-    protected $type = 'metadata';
-
-    /**
      * MetadataService constructor.
      */
     public function __construct()
@@ -33,7 +27,8 @@ class MetadataService extends Service
     public function index($metaData)
     {
         try {
-            $params                                = $this->getIndexType();
+            $params                                = [];
+            $params['index']                       = $this->getMetadataIndex();
             $params['id']                          = $metaData['id'];
             $document                              = $this->es->exists($params);
             $master_metadata                       = json_decode($metaData['metadata']);
@@ -110,16 +105,14 @@ class MetadataService extends Service
      */
     public function updateTextOCID($id, $ocid)
     {
-        $params['index'] = $this->index;
-        $params['type']  = "pdf_text";
+        $params['index'] = $this->getPdfTextIndex();
         $params['body']  = ['size' => 10000, 'query' => ["term" => ["contract_id" => ["value" => $id]]]];
         $results         = $this->es->search($params);
         $results         = $results['hits']['hits'];
         $response        = [];
 
         foreach ($results as $result) {
-            $uParam['index']       = $this->index;
-            $uParam['type']        = 'pdf_text';
+            $uParam['index']       = $this->getPdfTextIndex();
             $uParam['id']          = $result['_id'];
             $uParam['body']['doc'] = ['open_contracting_id' => $ocid];
             $res                   = $this->es->update($uParam);
@@ -139,16 +132,14 @@ class MetadataService extends Service
      */
     public function updateAnnotationOCID($id, $ocid)
     {
-        $params['index'] = $this->index;
-        $params['type']  = "annotations";
+        $params['index'] = $this->getAnnotationsIndex();
         $params['body']  = ['size' => 10000, 'query' => ["term" => ["contract_id" => ["value" => $id]]]];
         $results         = $this->es->search($params);
         $results         = $results['hits']['hits'];
         $response        = [];
 
         foreach ($results as $result) {
-            $uParam['index']       = $this->index;
-            $uParam['type']        = 'annotations';
+            $uParam['index']       = $this->getAnnotationsIndex();
             $uParam['id']          = $result['_id'];
             $uParam['body']['doc'] = ['open_contracting_id' => $ocid];
             $res                   = $this->es->update($uParam);
@@ -167,8 +158,9 @@ class MetadataService extends Service
      */
     public function delete($id)
     {
-        $params       = $this->getIndexType();
-        $params['id'] = $id;
+        $params             = [];
+        $params['index']    = $this->getMetadataIndex();
+        $params['id']       = $id;
 
         return $this->es->delete($params);
     }
@@ -184,8 +176,7 @@ class MetadataService extends Service
     public function insertIntoMaster($contractId, $metadata)
     {
         try {
-            $params['index'] = $this->index;
-            $params['type']  = "master";
+            $params['index'] = $this->getMasterIndex();
             $params['id']    = $contractId;
             $document        = $this->es->exists($params);
             $body            = [
@@ -2138,15 +2129,13 @@ class MetadataService extends Service
                         $published_at
                     )
                 );
-            $master_param['index']       = $this->index;
-            $master_param['type']        = 'master';
+            $master_param['index']       = $this->getMasterIndex();
             $master_param['id']          = $contract_id;
             $master_param['body']['doc'] = ['published_at' => $published_at];
             $master_res                  = $this->es->update($master_param);
             array_push($response, $master_res);
 
-            $metadata_param['index']       = $this->index;
-            $metadata_param['type']        = 'metadata';
+            $metadata_param['index']       = $this->getMetadataIndex();
             $metadata_param['id']          = $contract_id;
             $metadata_param['body']['doc'] = ['published_at' => $published_at];
             $metadata_res                  = $this->es->update($metadata_param);
@@ -2165,8 +2154,7 @@ class MetadataService extends Service
     public function getMasterPages()
     {
         $master_param          = [];
-        $master_param['index'] = $this->index;
-        $master_param['type']  = 'master';
+        $master_param['index'] = $this->getMasterIndex();
         $results               = $this->es->count($master_param);
         $count                 = (int) $results['count'];
         $page_size             = 1000;
@@ -2189,8 +2177,7 @@ class MetadataService extends Service
             $master_ids                                                      = [];
             $res                                                             = [];
             $master_param                                                    = [];
-            $master_param['index']                                           = $this->index;
-            $master_param['type']                                            = 'master';
+            $master_param['index']                                           = $this->getMasterIndex();
             $master_param['from']                                            = $from;
             $master_param['size']                                            = $page_size;
             $master_param['body']['_source']                                 = ['en.open_contracting_id'];
@@ -2205,8 +2192,7 @@ class MetadataService extends Service
             foreach ($results as $result) {
                 $master_ids[]                = $result['_id'];
                 $master_param                = [];
-                $master_param['index']       = $this->index;
-                $master_param['type']        = 'master';
+                $master_param['index']       = $this->getMasterIndex();
                 $master_param['id']          = $result['_id'];
                 $master_param['body']['doc'] = [
                     'is_supporting_document' => '0',
@@ -2243,14 +2229,12 @@ class MetadataService extends Service
 
         foreach ($parent_contracts as $parent_id => $child_contracts) {
             $master_param          = [];
-            $master_param['index'] = $this->index;
-            $master_param['type']  = 'master';
+            $master_param['index'] = $this->getMasterIndex();
             $master_param['id']    = $parent_id;
 
             if ($this->es->exists($master_param)) {
                 $master_param                = [];
-                $master_param['index']       = $this->index;
-                $master_param['type']        = 'master';
+                $master_param['index']       = $this->getMasterIndex();
                 $master_param['id']          = $parent_id;
                 $master_param['body']['doc'] = [
                     'is_supporting_document' => '0',
@@ -2278,14 +2262,12 @@ class MetadataService extends Service
 
         foreach ($child_contracts as $child_id => $parent_contract) {
             $master_param          = [];
-            $master_param['index'] = $this->index;
-            $master_param['type']  = 'master';
+            $master_param['index'] = $this->getMasterIndex();
             $master_param['id']    = $child_id;
 
             if ($this->es->exists($master_param)) {
                 $master_param                = [];
-                $master_param['index']       = $this->index;
-                $master_param['type']        = 'master';
+                $master_param['index']       = $this->getMasterIndex();
                 $master_param['id']          = $child_id;
                 $master_param['body']['doc'] = [
                     'is_supporting_document' => '1',

@@ -9,12 +9,6 @@ use League\Route\Http\Exception;
 class PdfTextService extends Service
 {
     /**
-     *  ES Type
-     * @var string
-     */
-    protected $type = 'pdf_text';
-
-    /**
      * Create or Update a document
      *
      * @param $textData
@@ -34,7 +28,8 @@ class PdfTextService extends Service
             $metadata['signature_year'] = $year;
             $response                   = [];
             foreach ($data as $text) {
-                $param       = $this->getIndexType();
+                $params          = [];
+                $params['index'] = $this->getPdfTextIndex();
                 $param['id'] = $text['id'];
                 $doc         = [
                     'metadata'            => $metadata,
@@ -73,8 +68,7 @@ class PdfTextService extends Service
     private function insertIntoMaster($contractId, $pdfText)
     {
         try {
-            $params['index'] = $this->index;
-            $params['type']  = "master";
+            $params['index'] = $this->getMasterIndex();
             $params['id']    = $contractId;
             $document        = $this->es->exists($params);
             $body            = [
