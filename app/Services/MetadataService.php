@@ -424,7 +424,7 @@ class MetadataService extends Service
                                             'type'   => 'text',
                                             'fields' =>
                                                 [
-                                                    'raw' =>
+                                                    'keyword' =>
                                                         [
                                                             'type' => 'keyword',
                                                         ],
@@ -475,7 +475,7 @@ class MetadataService extends Service
                             'type'     => 'text',
                             'fields'   =>
                                 [
-                                    'raw' =>
+                                    'keyword' =>
                                         [
                                             'type' => 'keyword',
                                         ],
@@ -495,7 +495,7 @@ class MetadataService extends Service
                                             'type'   => 'text',
                                             'fields' =>
                                                 [
-                                                    'raw' =>
+                                                    'keyword' =>
                                                         [
                                                             'type' => 'keyword',
                                                         ],
@@ -506,7 +506,7 @@ class MetadataService extends Service
                                             'type'     => 'text',
                                             'fields'   =>
                                                 [
-                                                    'raw' =>
+                                                    'keyword' =>
                                                         [
                                                             'type' => 'keyword',
                                                         ],
@@ -541,7 +541,7 @@ class MetadataService extends Service
                             'type'     => 'text',
                             'fields'   =>
                                 [
-                                    'raw' =>
+                                    'keyword' =>
                                         [
                                             'type' => 'keyword',
                                         ],
@@ -702,7 +702,7 @@ class MetadataService extends Service
                             'type'     => 'text',
                             'fields'   =>
                                 [
-                                    'raw' =>
+                                    'keyword' =>
                                         [
                                             'type' => 'keyword',
                                         ],
@@ -723,7 +723,7 @@ class MetadataService extends Service
                             'type'   => 'text',
                             'fields' =>
                                 [
-                                    'raw' =>
+                                    'keyword' =>
                                         [
                                             'type' => 'keyword',
                                         ],
@@ -760,7 +760,7 @@ class MetadataService extends Service
                             'type'     => 'text',
                             'fields'   =>
                                 [
-                                    'raw' =>
+                                    'keyword' =>
                                         [
                                             'type' => 'keyword',
                                         ],
