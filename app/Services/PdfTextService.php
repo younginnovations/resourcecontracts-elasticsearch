@@ -28,8 +28,8 @@ class PdfTextService extends Service
             $metadata['signature_year'] = $year;
             $response                   = [];
             foreach ($data as $text) {
-                $params          = [];
-                $params['index'] = $this->getPdfTextIndex();
+                $param          = [];
+                $param['index'] = $this->getPdfTextIndex();
                 $param['id'] = $text['id'];
                 $doc         = [
                     'metadata'            => $metadata,
