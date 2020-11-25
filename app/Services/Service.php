@@ -10,6 +10,12 @@ class Service
      */
     protected $index;
 
+    /*
+     * Prefix to use for all ES indexes
+     * @var string
+     */
+    protected $indices_prefix;
+
     /**
      *  ES Type
      * @var string
@@ -26,6 +32,7 @@ class Service
     {
         $hosts       = explode(",",env('ELASTICSEARCH_SERVER'));
         $this->index = env('INDEX');
+        $this->indices_prefix = env('INDICES_PREFIX');
         $client      = ClientBuilder::create()->setHosts($hosts);
         $this->es    = $client->build();
     }
@@ -40,6 +47,26 @@ class Service
             'index' => $this->index,
             'type'  => $this->type,
         ];
+    }
+
+    public function getMasterIndex()
+    {
+        return $this->indices_prefix . '_master';
+    }
+
+    public function getMetadataIndex()
+    {
+        return $this->indices_prefix . '_metadata';
+    }
+
+    public function getAnnotationsIndex()
+    {
+        return $this->indices_prefix . '_annotations';
+    }
+
+    public function getPdfTextIndex()
+    {
+        return $this->indices_prefix . '_pdf_text';
     }
 
     /**
