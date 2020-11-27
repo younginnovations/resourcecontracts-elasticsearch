@@ -49,8 +49,7 @@ class DeleteContractService extends Service
     public function deleteMetadata($id)
     {
         try {
-            $params['index'] = $this->index;
-            $params['type']  = "metadata";
+            $params['index'] = $this->getMetadataIndex();
             $params['id']    = $id;
 
             $delete = $this->deleteDocument($params);
@@ -75,8 +74,7 @@ class DeleteContractService extends Service
     public function deletePdfText($id)
     {
         try {
-            $params['index']                                = $this->index;
-            $params['type']                                 = "pdf_text";
+            $params['index']                                = $this->getPdfTextIndex();
             $params['body']['query']['term']['contract_id'] = $id;
 
             $delete = $this->deleteDocumentByQuery($params);
@@ -102,8 +100,7 @@ class DeleteContractService extends Service
     public function deleteAnnotations($id)
     {
         try {
-            $params['index']                                = $this->index;
-            $params['type']                                 = "annotations";
+            $params['index']                                = $this->getAnnotationsIndex();
             $params['body']['query']['term']['contract_id'] = $id;
             $delete                                         = $this->deleteDocumentByQuery($params);
             $this->updateAnnotationInMaster($id);
@@ -128,8 +125,7 @@ class DeleteContractService extends Service
     public function deleteMaster($id)
     {
         try {
-            $params['index'] = $this->index;
-            $params['type']  = "master";
+            $params['index'] = $this->getMasterIndex();
             $params['id']    = $id;
             $delete          = $this->deleteDocument($params);
             logger()->info("Master Deleted", $delete);
@@ -152,8 +148,7 @@ class DeleteContractService extends Service
     public function updateTextInMaster($id)
     {
         try {
-            $params['index']       = $this->index;
-            $params['type']        = "master";
+            $params['index']       = $this->getMasterIndex();
             $params['id']          = $id;
             $params['body']['doc'] = [
                 "pdf_text_string" => "",
@@ -180,8 +175,7 @@ class DeleteContractService extends Service
     public function updateAnnotationInMaster($id)
     {
         try {
-            $params['index']       = $this->index;
-            $params['type']        = "master";
+            $params['index']       = $this->getMasterIndex();
             $params['id']          = $id;
             $params['body']['doc'] = [
                 "annotations_category" => [],

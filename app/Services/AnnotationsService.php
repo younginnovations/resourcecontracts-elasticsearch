@@ -9,12 +9,6 @@ namespace App\Services;
 class AnnotationsService extends Service
 {
     /**
-     *  ES Type
-     * @var string
-     */
-    protected $type = 'annotations';
-
-    /**
      * Index Annotations
      *
      * @param $request
@@ -31,8 +25,7 @@ class AnnotationsService extends Service
             $anno = [];
             foreach ($annotations as $annotation) {
                 $params          = [];
-                $params['index'] = $this->index;
-                $params['type']  = $this->type;
+                $params['index'] = $this->getAnnotationsIndex();
                 $params['id']    = $annotation['id'];
 
                 $annotation['annotation_text'] = [
@@ -107,8 +100,7 @@ class AnnotationsService extends Service
     private function insertIntoMaster($contractId, $annotations)
     {
         try {
-            $params['index']      = $this->index;
-            $params['type']       = "master";
+            $params['index']      = $this->getMasterIndex();
             $params['id']         = $contractId;
             $document             = $this->es->exists($params);
             $annotations_category = $this->getAnnotationsCategory($annotations);
@@ -213,8 +205,7 @@ class AnnotationsService extends Service
 
         foreach ($contracts as $id => $contract) {
             $params               = [];
-            $params['index']      = $this->index;
-            $params['type']       = "master";
+            $params['index']      = $this->getMasterIndex();
             $params['id']         = $id;
             $document             = $this->es->exists($params);
             $annotations_category = $this->getAnnotationsCategory($contract);
@@ -242,8 +233,7 @@ class AnnotationsService extends Service
     public function getAnnotationDocs($category, $cluster)
     {
         $params                                  = [];
-        $params['index']                         = $this->index;
-        $params['type']                          = "annotations";
+        $params['index']                         = $this->getAnnotationsIndex();
         $params['body']['query']['bool']['must'][] = [
             "match" => [
                 "category_key.keyword" => $category,
@@ -272,8 +262,7 @@ class AnnotationsService extends Service
     public function updateAnnotationCluster($annotation_id, $cluster)
     {
         $params = [
-            'index' => $this->index,
-            'type'  => 'annotations',
+            'index' => $this->getAnnotationsIndex(),
             'id'    => $annotation_id,
             'body'  => ['doc' => ["cluster" => $cluster]],
         ];
