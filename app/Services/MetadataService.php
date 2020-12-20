@@ -1498,6 +1498,7 @@ class MetadataService extends Service
                     'pdf_text_string' =>
                         [
                             'type' => 'text',
+                            'term_vector' => 'with_positions_offsets',
                             'fields' =>
                                 [
                                     'keyword' =>
