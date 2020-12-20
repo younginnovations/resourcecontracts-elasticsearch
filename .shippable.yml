@@ -7,7 +7,6 @@ branches:
   only:
     - staging
     - master
-    - es-upgrade
     
 env:
   global:
