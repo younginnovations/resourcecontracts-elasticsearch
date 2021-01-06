@@ -295,6 +295,23 @@ class MetadataService extends Service
     }
 
     /**
+     * Ensure that all indices use 4 shards.
+     * @param $index
+     * @return array
+     */
+    private function buildIndexCreationParameters($index)
+    {
+        return [
+            'index' => $index,
+            'body' => [
+                'settings' => [
+                    'number_of_shards' => 5,
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Checks if indices exist. If not, creates them and updates the metadata mapping.
      */
     public function checkIndices()
@@ -302,7 +319,8 @@ class MetadataService extends Service
         $condition = $this->es->indices()->exists(['index' => $this->getMasterIndex()]);
         if (!$condition) {
             logger()->info("Creating master index.");
-            $this->es->indices()->create(['index' => $this->getMasterIndex()]);
+            $params = $this->buildIndexCreationParameters($this->getMasterIndex());
+            $this->es->indices()->create($params);
             $this->createMasterMapping();
             logger()->info("Created master index.");
         }
@@ -310,7 +328,8 @@ class MetadataService extends Service
         $condition = $this->es->indices()->exists(['index' => $this->getMetadataIndex()]);
         if (!$condition) {
             logger()->info("Creating metadata index.");
-            $this->es->indices()->create(['index' => $this->getMetadataIndex()]);
+            $params = $this->buildIndexCreationParameters($this->getMetadataIndex());
+            $this->es->indices()->create($params);
             $this->createMetadataMapping();
             logger()->info("Created metadata index.");
         }
@@ -318,7 +337,8 @@ class MetadataService extends Service
         $condition = $this->es->indices()->exists(['index' => $this->getAnnotationsIndex()]);
         if (!$condition) {
             logger()->info("Creating annotations index.");
-            $this->es->indices()->create(['index' => $this->getAnnotationsIndex()]);
+            $params = $this->buildIndexCreationParameters($this->getAnnotationsIndex());
+            $this->es->indices()->create($params);
             $this->createAnnotationsMapping();
             logger()->info("Created annotations index.");
         }
@@ -326,7 +346,8 @@ class MetadataService extends Service
         $condition = $this->es->indices()->exists(['index' => $this->getPdfTextIndex()]);
         if (!$condition) {
             logger()->info("Creating pdf text index.");
-            $this->es->indices()->create(['index' => $this->getPdfTextIndex()]);
+            $params = $this->buildIndexCreationParameters($this->getPdfTextIndex());
+            $this->es->indices()->create($params);
             $this->createPdfTextMapping();
             logger()->info("Created pdf text index.");
         }
